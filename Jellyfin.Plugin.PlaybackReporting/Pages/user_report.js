@@ -96,7 +96,7 @@ define(['libraryMenu'], function (libraryMenu) {
 
                         row_html += "<tr class='detailTableBodyRow detailTableBodyRow-shaded'>";
 
-                        var user_image = "css/images/logindefault.png";
+                        var user_image = "assets/img/avatar.png";
                         if (user_info.has_image) {
                             user_image = "Users/" + user_info.user_id + "/Images/Primary?width=50";
                             user_image = ApiClient.getUrl(user_image);
