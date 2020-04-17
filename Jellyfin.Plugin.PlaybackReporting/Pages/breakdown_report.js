@@ -265,8 +265,14 @@ define(['libraryMenu'], function (libraryMenu) {
                 process_click();
 
                 function process_click() {
-                    var days = parseInt(weeks.value) * 7;
-
+                    //Need to implement a better method to select all data instead of 18250 days = 50 years. 
+                    if (parseInt(weeks.value) == 0){
+                        var days = 18250;
+                    }
+                    else{
+                        var days = parseInt(weeks.value) * 7;
+                    }
+                    
                     // build user chart
                     var url = "user_usage_stats/UserId/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
                     url = ApiClient.getUrl(url);
