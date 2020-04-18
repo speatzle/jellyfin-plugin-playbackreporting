@@ -267,7 +267,7 @@ define(['libraryMenu'], function (libraryMenu) {
                 function process_click() {
                     //Need to implement a better method to select all data instead of 18250 days = 50 years. 
                     var days = 18250;
-                    if (parseInt(weeks.value) != 0){
+                    if (parseInt(weeks.value) != -1){
                         var days = parseInt(weeks.value) * 7;
                     }
                     
