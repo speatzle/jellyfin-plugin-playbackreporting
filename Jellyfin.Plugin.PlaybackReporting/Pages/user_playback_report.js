@@ -485,10 +485,8 @@ define(['libraryMenu'], function (libraryMenu) {
                     var weeks = view.querySelector('#weeks');
                     weeks.addEventListener("change", process_click);
                     //Need to implement a better method to select all data instead of 18250 days = 50 years. 
-                    if (parseInt(weeks.value) == 0){
-                        var days = 18250;
-                    }
-                    else{
+                    var days = 18250;
+                    if (parseInt(weeks.value) != 0){
                         var days = parseInt(weeks.value) * 7;
                     }
 
@@ -516,11 +514,9 @@ define(['libraryMenu'], function (libraryMenu) {
                         
                         /* Since the graph renders each day, rendering all the data does not make sense for this graph. Maybe figure out a way to combine data into months?
                         //Need to implement a better method to select all data instead of 18250 days = 50 years. 
-                        if (parseInt(weeks.value) == 0){
-                            days = 18250;
-                        }
-                        else{
-                            days = parseInt(weeks.value) * 7;
+                        var days = 18250;
+                        if (parseInt(weeks.value) != 0){
+                            var days = parseInt(weeks.value) * 7;
                         }
                         */
                        days = parseInt(weeks.value) * 7;

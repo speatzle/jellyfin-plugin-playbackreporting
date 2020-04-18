@@ -78,23 +78,14 @@ define(['libraryMenu'], function (libraryMenu) {
 
             var weeks = view.querySelector('#weeks');
             weeks.addEventListener("change", process_click);
-            //Need to implement a better method to select all data instead of 18250 days = 50 years. 
-            if (parseInt(weeks.value) == 0){
-                var days = 18250;
-            }
-            else{
-                var days = parseInt(weeks.value) * 7;
-            }
 
             process_click();
 
             function process_click() {
                 //Need to implement a better method to select all data instead of 18250 days = 50 years. 
-                if (parseInt(weeks.value) == 0){
-                    days = 18250;
-                }
-                else{
-                    days = parseInt(weeks.value) * 7;
+                var days = 18250;
+                if (parseInt(weeks.value) != 0){
+                    var days = parseInt(weeks.value) * 7;
                 }
                 var url = "user_usage_stats/user_activity?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
                 url = ApiClient.getUrl(url);

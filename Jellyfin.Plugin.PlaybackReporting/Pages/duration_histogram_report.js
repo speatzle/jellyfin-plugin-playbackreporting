@@ -202,10 +202,8 @@ define(['libraryMenu'], function (libraryMenu) {
                         }
                         
                         //Need to implement a better method to select all data instead of 18250 days = 50 years. 
-                        if (parseInt(weeks.value) == 0){
-                            var days = 18250;
-                        }
-                        else{
+                        var days = 18250;
+                        if (parseInt(weeks.value) != 0){
                             var days = parseInt(weeks.value) * 7;
                         }
                         var url = "user_usage_stats/DurationHistogramReport?days=" + days + "&end_date=" + end_date.value + "&filter=" + filter.join(",") + "&stamp=" + new Date().getTime();
