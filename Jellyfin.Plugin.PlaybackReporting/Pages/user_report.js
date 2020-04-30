@@ -83,6 +83,7 @@ define(['libraryMenu'], function (libraryMenu) {
 
             function process_click() {
                 var days = parseInt(weeks.value) * 7;
+                //Set days filter to 50 years if 'all' option is selected.
                 if (days == -7) days = 18250;
 
                 var url = "user_usage_stats/user_activity?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
