@@ -484,6 +484,7 @@ define(['libraryMenu'], function (libraryMenu) {
 
                     var weeks = view.querySelector('#weeks');
                     weeks.addEventListener("change", process_click);
+                    var days = parseInt(weeks.value) * 7;
 
                     var url = "user_usage_stats/PlayActivity?filter=" + filter_names.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=count&stamp=" + new Date().getTime();
                     url = ApiClient.getUrl(url);
@@ -508,7 +509,7 @@ define(['libraryMenu'], function (libraryMenu) {
                         var data_t = data_type.options[data_type.selectedIndex].value;
                         
                         /* Since the graph renders each day, rendering all the data does not make sense for this graph. Maybe figure out a way to combine data into months? */
-                        var days = parseInt(weeks.value) * 7;
+                        days = parseInt(weeks.value) * 7;
                         
 
                         var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=" + data_t + "&stamp=" + new Date().getTime();
