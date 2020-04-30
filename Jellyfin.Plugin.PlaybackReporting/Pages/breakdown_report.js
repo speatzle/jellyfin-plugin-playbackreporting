@@ -266,7 +266,9 @@ define(['libraryMenu'], function (libraryMenu) {
 
                 function process_click() {
                     var days = parseInt(weeks.value) * 7;
-                       if (days == -7) days = 18250;
+                    //Set days filter to 50 years if 'all' option is selected.
+                    if (days == -7) days = 18250;
+                    
                     
                     // build user chart
                     var url = "user_usage_stats/UserId/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
