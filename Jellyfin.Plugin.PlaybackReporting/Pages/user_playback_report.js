@@ -508,7 +508,6 @@ define(['libraryMenu'], function (libraryMenu) {
                         var data_t = data_type.options[data_type.selectedIndex].value;
                         
                         /* Since the graph renders each day, rendering all the data does not make sense for this graph. Maybe figure out a way to combine data into months? */
-
                         var days = parseInt(weeks.value) * 7;
                         
 
