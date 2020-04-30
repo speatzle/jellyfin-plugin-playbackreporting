@@ -519,7 +519,7 @@ define(['libraryMenu'], function (libraryMenu) {
                             var days = parseInt(weeks.value) * 7;
                         }
                         */
-                       days = parseInt(weeks.value) * 7;
+                        days = parseInt(weeks.value) * 7;
                         
 
                         var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=" + data_t + "&stamp=" + new Date().getTime();
