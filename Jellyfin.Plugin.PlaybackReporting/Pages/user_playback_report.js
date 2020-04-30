@@ -507,8 +507,10 @@ define(['libraryMenu'], function (libraryMenu) {
                         }
 
                         var data_t = data_type.options[data_type.selectedIndex].value;
-
+                        
+                        /* Since the graph renders each day, rendering all the data does not make sense for this graph. Maybe figure out a way to combine data into months? */
                         days = parseInt(weeks.value) * 7;
+                        
 
                         var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=" + data_t + "&stamp=" + new Date().getTime();
                         filtered_url = ApiClient.getUrl(filtered_url);

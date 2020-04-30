@@ -402,8 +402,10 @@ define(['libraryMenu'], function (libraryMenu) {
                                 filter.push(filter_name);
                             }
                         }
-
                         var days = parseInt(weeks.value) * 7;
+                        //Set days filter to 50 years if 'all' option is selected.
+                        if (days == -7) days = 18250;
+                        
                         var url = "user_usage_stats/HourlyReport?days=" + days + "&end_date=" + end_date.value + "&filter=" + filter.join(",") + "&stamp=" + new Date().getTime();
                         url = ApiClient.getUrl(url);
                         ApiClient.getUserActivity(url).then(function (usage_data) {
