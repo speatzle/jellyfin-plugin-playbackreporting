@@ -1,9 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyVersion>6.0.0</AssemblyVersion>
-    <FileVersion>6.0.0</FileVersion>
+    <AssemblyVersion>6.0.0.0</AssemblyVersion>
+    <FileVersion>6.0.0.0</FileVersion>
   </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Pages\breakdown_report.html" />
     <None Remove="Pages\breakdown_report.js" />
@@ -20,8 +22,8 @@
     <None Remove="Pages\user_playback_report.js" />
     <None Remove="Pages\user_report.html" />
     <None Remove="Pages\user_report.js" />
-    <None Remove="thumb.png" />
   </ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="Pages\breakdown_report.html" />
     <EmbeddedResource Include="Pages\breakdown_report.js" />
@@ -38,11 +40,12 @@
     <EmbeddedResource Include="Pages\custom_query.js" />
     <EmbeddedResource Include="Pages\user_report.html" />
     <EmbeddedResource Include="Pages\user_report.js" />
-    <EmbeddedResource Include="thumb.png" />
   </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Controller" Version="10.4-*" />
+    <PackageReference Include="Jellyfin.Controller" Version="10.*" />
     <PackageReference Include="SQLitePCL.pretty.netstandard" Version="1.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
+
 </Project>
