@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Jellyfin.Data.Entities;
 using Jellyfin.Plugin.PlaybackReporting.Data;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
@@ -226,16 +227,11 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             foreach(var user_info in report)
             {
                 string user_id = (string)user_info["user_id"];
-                string user_name = "Not Known";
-                bool has_image = false;
                 Guid user_guid = new Guid(user_id);
                 User user = _userManager.GetUserById(user_guid);
+                bool has_image = user?.ProfileImage is null ? false : true;
+                string user_name = user?.Username ?? "Not Known";
 
-                if (user != null)
-                {
-                    user_name = user.Name;
-                    has_image = user.HasImage(MediaBrowser.Model.Entities.ImageType.Primary);
-                }
                 user_info.Add("user_name", user_name);
                 user_info.Add("has_image", has_image);
 
@@ -337,7 +333,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             foreach (var emby_user in _userManager.Users)
             {
                 Dictionary<string, object> user_info = new Dictionary<string, object>();
-                user_info.Add("name", emby_user.Name);
+                user_info.Add("name", emby_user.Username);
                 user_info.Add("id", emby_user.Id.ToString("N"));
                 user_info.Add("in_list", user_id_list.Contains(emby_user.Id.ToString("N")));
                 users.Add(user_info);
@@ -488,7 +484,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
                     User user = _userManager.GetUserById(user_guid);
                     if (user != null)
                     {
-                        user_name = user.Name;
+                        user_name = user.Username;
                     }
                 }
 
@@ -567,7 +563,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
                         if (user != null)
                         {
-                            row["label"] = user.Name;
+                            row["label"] = user.Username;
                         }
                     }
                     else
@@ -674,7 +670,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
                 Dictionary<string, string> user_map = new Dictionary<string, string>();
                 foreach (var user in _userManager.Users)
                 {
-                    user_map.Add(user.Id.ToString("N"), user.Name);
+                    user_map.Add(user.Id.ToString("N"), user.Username);
                 }
 
                 foreach(var row in result)

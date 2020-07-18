@@ -1,8 +1,8 @@
 ---
 name: "Playback Reporting"
 guid: "5c534381-91a3-43cb-907a-35aa02eb9d2c"
-version: "6.0.0.0"
-targetAbi: "10.5.0.0"
+version: "7.0.0.0"
+targetAbi: "10.6.0.0"
 owner: "jellyfin"
 overview: "Collect and show user play statistics"
 description: "Collect and show user play statistics"
