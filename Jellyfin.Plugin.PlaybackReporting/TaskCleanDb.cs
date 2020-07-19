@@ -40,14 +40,14 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
         private IActivityRepository Repository;
 
-        public TaskCleanDb(ILogger<TaskCleanDb> logger, IServerConfigurationManager config, IFileSystem fileSystem)
+        public TaskCleanDb(ILoggerFactory loggerFactory, IServerConfigurationManager config, IFileSystem fileSystem)
         {
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<TaskCleanDb>();
             _config = config;
             _fileSystem = fileSystem;
 
             _logger.LogInformation("TaskCleanDb Loaded");
-            var repo = new ActivityRepository(_logger, _config.ApplicationPaths, _fileSystem);
+            var repo = new ActivityRepository(loggerFactory.CreateLogger<ActivityRepository>(), _config.ApplicationPaths, _fileSystem);
             //repo.Initialize();
             Repository = repo;
         }

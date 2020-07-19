@@ -31,9 +31,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         protected string DbFilePath { get; set; }
         protected ReaderWriterLockSlim WriteLock;
 
-        protected ILogger Logger { get; private set; }
+        protected ILogger<BaseSqliteRepository> Logger { get; private set; }
 
-        protected BaseSqliteRepository(ILogger logger)
+        protected BaseSqliteRepository(ILogger<BaseSqliteRepository> logger)
         {
             Logger = logger;
 

@@ -37,17 +37,20 @@ namespace Jellyfin.Plugin.PlaybackReporting
         private readonly ISessionManager _sessionManager;
         private readonly IServerConfigurationManager _config;
         private readonly ILogger<EventMonitorEntryPoint> _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IFileSystem _fileSystem;
 
         private Dictionary<string, PlaybackTracker> playback_trackers = null;
         private IActivityRepository _repository;
 
-        public EventMonitorEntryPoint(ISessionManager sessionManager,
+        public EventMonitorEntryPoint(
+            ISessionManager sessionManager,
             IServerConfigurationManager config,
-            ILogger<EventMonitorEntryPoint> logger,
+            ILoggerFactory loggerFactory,
             IFileSystem fileSystem)
         {
-            _logger = logger;
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<EventMonitorEntryPoint>();
             _sessionManager = sessionManager;
             _config = config;
             _fileSystem = fileSystem;
@@ -62,7 +65,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
         public Task RunAsync()
         {
             _logger.LogInformation("EventMonitorEntryPoint Running");
-            var repo = new ActivityRepository(_logger, _config.ApplicationPaths, _fileSystem);
+            var repo = new ActivityRepository(_loggerFactory.CreateLogger<ActivityRepository>(), _config.ApplicationPaths, _fileSystem);
             repo.Initialize();
             _repository = repo;
 
@@ -183,7 +186,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             }
 
             _logger.LogInformation("Adding playback tracker : " + key);
-            PlaybackTracker tracker = new PlaybackTracker(_logger);
+            PlaybackTracker tracker = new PlaybackTracker(_loggerFactory.CreateLogger<PlaybackTracker>());
             tracker.ProcessStart(e);
             playback_trackers.Add(key, tracker);
 

@@ -29,16 +29,16 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
         private readonly IActivityRepository _repository;
         private readonly IServerConfigurationManager _config;
-        private readonly ILogger _logger;
+        private readonly ILogger<BackupManager> _logger;
         private readonly IFileSystem _fileSystem;
 
-        public BackupManager(IServerConfigurationManager config, ILogger logger, IFileSystem fileSystem)
+        public BackupManager(IServerConfigurationManager config, ILoggerFactory loggerFactory, IFileSystem fileSystem)
         {
             _config = config;
             _fileSystem = fileSystem;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<BackupManager>();
 
-            _repository = new ActivityRepository(_logger, _config.ApplicationPaths, _fileSystem);
+            _repository = new ActivityRepository(loggerFactory.CreateLogger<ActivityRepository>(), _config.ApplicationPaths, _fileSystem);
         }
 
 
