@@ -25,13 +25,13 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
     {
         private bool IsPaused;
         public PlaybackInfo TrackedPlaybackInfo { set; get; }
-        private readonly ILogger _logger;
+        private readonly ILogger<PlaybackTracker> _logger;
         private readonly List<KeyValuePair<DateTime, ActionType>> event_tracking = new List<KeyValuePair<DateTime, ActionType>>();
         public DateTime LastUpdated = DateTime.MinValue;
 
         private enum ActionType { START, STOP, PAUSE, UNPAUSE, NONE }
 
-        public PlaybackTracker(ILogger logger)
+        public PlaybackTracker(ILogger<PlaybackTracker> logger)
         {
             _logger = logger;
         }

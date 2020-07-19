@@ -178,25 +178,28 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
     public class UserActivityAPI : IService, IRequiresRequest
     {
 
-        private readonly ILogger _logger;
+        private readonly ILogger<UserActivityAPI> _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IFileSystem _fileSystem;
         private readonly IServerConfigurationManager _config;
         private readonly IUserManager _userManager;
 
         private readonly IActivityRepository _repository;
 
-        public UserActivityAPI(ILoggerFactory logger,
+        public UserActivityAPI(
+            ILoggerFactory loggerFactory,
             IFileSystem fileSystem,
             IServerConfigurationManager config,
             IUserManager userManager)
         {
-            _logger = logger.CreateLogger("PlaybackReporting - UserActivityAPI");
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<UserActivityAPI>();
             _fileSystem = fileSystem;
             _config = config;
             _userManager = userManager;
 
             _logger.LogInformation("UserActivityAPI Loaded");
-            var repo = new ActivityRepository(_logger, _config.ApplicationPaths, _fileSystem);
+            var repo = new ActivityRepository(loggerFactory.CreateLogger<ActivityRepository>(), _config.ApplicationPaths, _fileSystem);
             //repo.Initialize();
             _repository = repo;
         }
@@ -420,7 +423,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         }
         public object Get(SaveBackup saveBackup)
         {
-            BackupManager bum = new BackupManager(_config, _logger, _fileSystem);
+            BackupManager bum = new BackupManager(_config, _loggerFactory, _fileSystem);
             string message = bum.SaveBackup();
 
             return new List<string> { message };

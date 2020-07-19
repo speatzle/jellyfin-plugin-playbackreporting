@@ -27,7 +27,8 @@ namespace Jellyfin.Plugin.PlaybackReporting
 {
     public class TaskRunBackup : IScheduledTask
     {
-        private ILogger _logger;
+        private ILogger<TaskRunBackup> _logger;
+        private ILoggerFactory _loggerFactory;
         private readonly IServerConfigurationManager _config;
         private readonly IFileSystem _fileSystem;
 
@@ -37,13 +38,14 @@ namespace Jellyfin.Plugin.PlaybackReporting
         public string Category => "Playback Reporting";
 
 
-        public TaskRunBackup(ILoggerFactory logger, IServerConfigurationManager config, IFileSystem fileSystem)
+        public TaskRunBackup(ILoggerFactory loggerFactory, IServerConfigurationManager config, IFileSystem fileSystem)
         {
-            _logger = logger.CreateLogger("PlaybackReporting - TaskCleanDb");
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<TaskRunBackup>();
             _config = config;
             _fileSystem = fileSystem;
 
-            _logger.LogInformation("TaskCleanDb Loaded");
+            _logger.LogInformation("TaskRunBackup Loaded");
         }
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
@@ -62,7 +64,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             await System.Threading.Tasks.Task.Run(() =>
             {
 
-                BackupManager backup = new BackupManager(_config, _logger, _fileSystem);
+                BackupManager backup = new BackupManager(_config, _loggerFactory, _fileSystem);
                 backup.SaveBackup();
 
             }, cancellationToken);

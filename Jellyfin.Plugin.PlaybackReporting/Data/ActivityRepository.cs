@@ -26,10 +26,10 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 {
     public class ActivityRepository : BaseSqliteRepository, IActivityRepository
     {
-        private readonly ILogger _logger;
+        private readonly ILogger<ActivityRepository> _logger;
         protected IFileSystem FileSystem { get; private set; }
 
-        public ActivityRepository(ILogger logger, IServerApplicationPaths appPaths, IFileSystem fileSystem) : base(logger)
+        public ActivityRepository(ILogger<ActivityRepository> logger, IServerApplicationPaths appPaths, IFileSystem fileSystem) : base(logger)
         {
             DbFilePath = Path.Combine(appPaths.DataPath, "playback_reporting.db");
             FileSystem = fileSystem;
