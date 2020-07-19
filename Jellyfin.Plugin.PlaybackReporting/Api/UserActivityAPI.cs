@@ -178,19 +178,19 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
     public class UserActivityAPI : IService, IRequiresRequest
     {
 
-        private readonly ILogger _logger;
+        private readonly ILogger<UserActivityAPI> _logger;
         private readonly IFileSystem _fileSystem;
         private readonly IServerConfigurationManager _config;
         private readonly IUserManager _userManager;
 
         private readonly IActivityRepository _repository;
 
-        public UserActivityAPI(ILoggerFactory logger,
+        public UserActivityAPI(ILogger<UserActivityAPI> logger,
             IFileSystem fileSystem,
             IServerConfigurationManager config,
             IUserManager userManager)
         {
-            _logger = logger.CreateLogger("PlaybackReporting - UserActivityAPI");
+            _logger = logger;
             _fileSystem = fileSystem;
             _config = config;
             _userManager = userManager;

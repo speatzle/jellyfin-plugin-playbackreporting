@@ -36,7 +36,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
     {
         private readonly ISessionManager _sessionManager;
         private readonly IServerConfigurationManager _config;
-        private readonly ILogger _logger;
+        private readonly ILogger<EventMonitorEntryPoint> _logger;
         private readonly IFileSystem _fileSystem;
 
         private Dictionary<string, PlaybackTracker> playback_trackers = null;
@@ -44,10 +44,10 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
         public EventMonitorEntryPoint(ISessionManager sessionManager,
             IServerConfigurationManager config,
-            ILoggerFactory logger,
+            ILogger<EventMonitorEntryPoint> logger,
             IFileSystem fileSystem)
         {
-            _logger = logger.CreateLogger("PlaybackReporting - EventMonitorEntryPoint");
+            _logger = logger;
             _sessionManager = sessionManager;
             _config = config;
             _fileSystem = fileSystem;

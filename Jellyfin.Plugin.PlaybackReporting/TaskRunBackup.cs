@@ -27,7 +27,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 {
     public class TaskRunBackup : IScheduledTask
     {
-        private ILogger _logger;
+        private ILogger<TaskRunBackup> _logger;
         private readonly IServerConfigurationManager _config;
         private readonly IFileSystem _fileSystem;
 
@@ -37,13 +37,13 @@ namespace Jellyfin.Plugin.PlaybackReporting
         public string Category => "Playback Reporting";
 
 
-        public TaskRunBackup(ILoggerFactory logger, IServerConfigurationManager config, IFileSystem fileSystem)
+        public TaskRunBackup(ILogger<TaskRunBackup> logger, IServerConfigurationManager config, IFileSystem fileSystem)
         {
-            _logger = logger.CreateLogger("PlaybackReporting - TaskCleanDb");
+            _logger = logger;
             _config = config;
             _fileSystem = fileSystem;
 
-            _logger.LogInformation("TaskCleanDb Loaded");
+            _logger.LogInformation("TaskRunBackup Loaded");
         }
 
         public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
