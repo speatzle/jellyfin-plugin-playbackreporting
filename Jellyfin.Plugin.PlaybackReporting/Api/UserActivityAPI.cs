@@ -24,6 +24,7 @@ using Jellyfin.Plugin.PlaybackReporting.Data;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
+using MediaBrowser.Controller.Net;
 using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Serialization;
 using MediaBrowser.Model.Services;
@@ -175,6 +176,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         public string end_date { get; set; }
     }
 
+    [Authenticated]
     public class UserActivityAPI : IService, IRequiresRequest
     {
 
