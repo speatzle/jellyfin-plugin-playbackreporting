@@ -70,7 +70,7 @@ define(['libraryMenu'], function (libraryMenu) {
         // init code here
         view.addEventListener('viewshow', function (e) {
 
-            libraryMenu.setTabs('user_report', 0, getTabs);
+            LibraryMenu.setTabs('user_report', 0, getTabs);
 
             var end_date = view.querySelector('#end_date');
             end_date.value = new Date().toDateInputValue();
