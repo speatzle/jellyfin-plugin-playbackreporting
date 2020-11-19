@@ -145,7 +145,7 @@ define(['libraryMenu'], function (libraryMenu) {
         // init code here
         view.addEventListener('viewshow', function (e) {
 
-            libraryMenu.setTabs('playplayback_report_settingsback_reporting', 6, getTabs);
+            LibraryMenu.setTabs('playplayback_report_settingsback_reporting', 6, getTabs);
 
             var set_backup_path = view.querySelector('#set_backup_path');
             set_backup_path.addEventListener("click", setBackupPathPicker);

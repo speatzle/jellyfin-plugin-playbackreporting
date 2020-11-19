@@ -69,7 +69,7 @@ define(['libraryMenu'], function (libraryMenu) {
         // init code here
         view.addEventListener('viewshow', function (e) {
 
-            libraryMenu.setTabs('custom_query', 5, getTabs);
+            LibraryMenu.setTabs('custom_query', 5, getTabs);
 
             var run_custom_query = view.querySelector('#run_custom_query');
             run_custom_query.addEventListener("click", runQuery);

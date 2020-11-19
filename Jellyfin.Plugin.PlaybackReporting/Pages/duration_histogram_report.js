@@ -157,7 +157,7 @@ define(['libraryMenu'], function (libraryMenu) {
         // init code here
         view.addEventListener('viewshow', function (e) {
 
-            libraryMenu.setTabs('Jellyfin.Plugin.PlaybackReporting', 4, getTabs);
+            LibraryMenu.setTabs('Jellyfin.Plugin.PlaybackReporting', 4, getTabs);
 
             require([Dashboard.getConfigurationResourceUrl('Chart.bundle.min.js')], function (d3) {
 
