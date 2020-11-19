@@ -24,6 +24,7 @@ using Jellyfin.Plugin.PlaybackReporting.Data;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -456,7 +457,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             return Ok(report);
         }
-        
+
         /// <summary>
         /// Gets TV Shows counts.
         /// </summary>
@@ -540,10 +541,10 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             responce.Add("colums", colums);
             responce.Add("results", result);
             responce.Add("message", message);
-            
+
             return responce;
         }
-        
+
         private string GetLastSeenString(TimeSpan span)
         {
             String last_seen = "";
