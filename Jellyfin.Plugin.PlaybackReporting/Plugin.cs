@@ -34,7 +34,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
         public override string Name => "Playback Reporting";
         public override Guid Id => new Guid("5c534381-91a3-43cb-907a-35aa02eb9d2c");
         public override string Description => "Show reports for playback activity";
-        public static Plugin Instance { get; private set; }
+        public static Plugin? Instance { get; private set; }
         public PluginConfiguration PluginConfiguration => Configuration;
 
         public IEnumerable<PluginPageInfo> GetPages()

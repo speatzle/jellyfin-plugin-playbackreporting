@@ -20,6 +20,29 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 {
     public class PlaybackInfo
     {
+        public PlaybackInfo(
+            string id,
+            DateTime date,
+            string clientName,
+            string deviceName,
+            string playbackMethod,
+            string userId,
+            string itemId,
+            string itemName,
+            string itemType)
+        {
+            Id = id;
+            Date = date;
+            ClientName = clientName;
+            DeviceName = deviceName;
+            PlaybackMethod = playbackMethod;
+            UserId = userId;
+            ItemId = itemId;
+            ItemName = itemName;
+            ItemType = itemType;
+        }
+
+
         public string Id { get; set; }
         public DateTime Date { get; set; }
         public string UserId { get; set; }

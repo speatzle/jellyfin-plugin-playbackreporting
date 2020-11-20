@@ -55,49 +55,47 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection())
+                using var connection = CreateConnection();
+                _logger.LogInformation("Initialize PlaybackActivity Repository");
+
+                string sql_info = "pragma table_info('PlaybackActivity')";
+                List<string> cols = new List<string>();
+                foreach (var row in connection.Query(sql_info))
                 {
-                    _logger.LogInformation("Initialize PlaybackActivity Repository");
-
-                    string sql_info = "pragma table_info('PlaybackActivity')";
-                    List<string> cols = new List<string>();
-                    foreach (var row in connection.Query(sql_info))
-                    {
-                        string table_schema = row[1].ToString().ToLower() + ":" + row[2].ToString().ToLower();
-                        cols.Add(table_schema);
-                    }
-                    string actual_schema = string.Join("|", cols);
-                    string required_schema = "datecreated:datetime|userid:text|itemid:text|itemtype:text|itemname:text|playbackmethod:text|clientname:text|devicename:text|playduration:int";
-                    if (required_schema != actual_schema)
-                    {
-                        _logger.LogInformation("PlaybackActivity table schema miss match!");
-                        _logger.LogInformation("Expected : {RequiredSchema}", required_schema);
-                        _logger.LogInformation("Received : {ActualSchema}", actual_schema);
-                        _logger.LogInformation("Dropping and recreating PlaybackActivity table");
-                        connection.Execute("drop table if exists PlaybackActivity");
-                    }
-                    else
-                    {
-                        _logger.LogInformation("PlaybackActivity table schema OK");
-                        _logger.LogInformation("Expected : {RequiredSchema}", required_schema);
-                        _logger.LogInformation("Received : {ActualSchema}", actual_schema);
-                    }
-
-                    // ROWID 
-                    connection.Execute("create table if not exists PlaybackActivity (" +
-                                    "DateCreated DATETIME NOT NULL, " +
-                                    "UserId TEXT, " +
-                                    "ItemId TEXT, " +
-                                    "ItemType TEXT, " +
-                                    "ItemName TEXT, " +
-                                    "PlaybackMethod TEXT, " +
-                                    "ClientName TEXT, " +
-                                    "DeviceName TEXT, " +
-                                    "PlayDuration INT" +
-                                    ")");
-
-                    connection.Execute("create table if not exists UserList (UserId TEXT)");
+                    string table_schema = row[1].ToString().ToLower() + ":" + row[2].ToString().ToLower();
+                    cols.Add(table_schema);
                 }
+                string actual_schema = string.Join("|", cols);
+                string required_schema = "datecreated:datetime|userid:text|itemid:text|itemtype:text|itemname:text|playbackmethod:text|clientname:text|devicename:text|playduration:int";
+                if (required_schema != actual_schema)
+                {
+                    _logger.LogInformation("PlaybackActivity table schema miss match!");
+                    _logger.LogInformation("Expected : {RequiredSchema}", required_schema);
+                    _logger.LogInformation("Received : {ActualSchema}", actual_schema);
+                    _logger.LogInformation("Dropping and recreating PlaybackActivity table");
+                    connection.Execute("drop table if exists PlaybackActivity");
+                }
+                else
+                {
+                    _logger.LogInformation("PlaybackActivity table schema OK");
+                    _logger.LogInformation("Expected : {RequiredSchema}", required_schema);
+                    _logger.LogInformation("Received : {ActualSchema}", actual_schema);
+                }
+
+                // ROWID 
+                connection.Execute("create table if not exists PlaybackActivity (" +
+                                "DateCreated DATETIME NOT NULL, " +
+                                "UserId TEXT, " +
+                                "ItemId TEXT, " +
+                                "ItemType TEXT, " +
+                                "ItemName TEXT, " +
+                                "PlaybackMethod TEXT, " +
+                                "ClientName TEXT, " +
+                                "DeviceName TEXT, " +
+                                "PlayDuration INT" +
+                                ")");
+
+                connection.Execute("create table if not exists UserList (UserId TEXT)");
             }
         }
 
@@ -108,42 +106,38 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             int change_count = 0;
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                try
                 {
-                    try
+                    using var statement = connection.PrepareStatement(query_string);
+                    foreach (var row in statement.ExecuteQuery())
                     {
-                        using (var statement = connection.PrepareStatement(query_string))
+                        if (!columns_done)
                         {
-                            foreach (var row in statement.ExecuteQuery())
+                            foreach (var col in row.Columns())
                             {
-                                if (!columns_done)
-                                {
-                                    foreach (var col in row.Columns())
-                                    {
-                                        col_names.Add(col.Name);
-                                    }
-                                    columns_done = true;
-                                }
-
-                                List<object> row_date = new List<object>();
-                                for(int x = 0; x < row.Count; x++)
-                                {
-                                    string cell_data = row[x].ToString();
-                                    row_date.Add(cell_data);
-                                }
-                                results.Add(row_date);
-
-                                string type = row[0].ToString();
+                                col_names.Add(col.Name);
                             }
-                            change_count = connection.GetChangeCount();
+                            columns_done = true;
                         }
+
+                        List<object> row_date = new List<object>();
+                        for (int x = 0; x < row.Count; x++)
+                        {
+                            string cell_data = row[x].ToString();
+                            row_date.Add(cell_data);
+                        }
+                        results.Add(row_date);
+
+                        string type = row[0].ToString();
                     }
-                    catch(Exception e)
-                    {
-                        _logger.LogError(e, "Error in SQL");
-                        message = "Error Running Query</br>" + e.Message;
-                        message += "<pre>" + e + "</pre>";
-                    }
+                    change_count = connection.GetChangeCount();
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "Error in SQL");
+                    message = "Error Running Query</br>" + e.Message;
+                    message += "<pre>" + e + "</pre>";
                 }
             }
 
@@ -163,13 +157,11 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection())
+                using var connection = CreateConnection();
+                connection.RunInTransaction(db =>
                 {
-                    connection.RunInTransaction(db =>
-                    {
-                        db.Execute(sql_query);
-                    }, TransactionMode);
-                }
+                    db.Execute(sql_query);
+                }, TransactionMode);
             }
             return 1;
         }
@@ -187,17 +179,13 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             }
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                connection.RunInTransaction(db =>
                 {
-                    connection.RunInTransaction(db =>
-                    {
-                        using (var statement = db.PrepareStatement(sql))
-                        {
-                            statement.TryBind("@id", id);
-                            statement.MoveNext();
-                        }
-                    }, TransactionMode);
-                }
+                    using var statement = db.PrepareStatement(sql);
+                    statement.TryBind("@id", id);
+                    statement.MoveNext();
+                }, TransactionMode);
             }
         }
 
@@ -206,17 +194,13 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             List<string> user_id_list = new List<string>();
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                string sql_query = "select UserId from UserList";
+                using var statement = connection.PrepareStatement(sql_query);
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    string sql_query = "select UserId from UserList";
-                    using (var statement = connection.PrepareStatement(sql_query))
-                    {
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string type = row[0].ToString();
-                            user_id_list.Add(type);
-                        }
-                    }
+                    string type = row[0].ToString();
+                    user_id_list.Add(type);
                 }
             }
 
@@ -228,17 +212,13 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             List<string> filter_Type_list = new List<string>();
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                string sql_query = "select distinct ItemType from PlaybackActivity";
+                using var statement = connection.PrepareStatement(sql_query);
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    string sql_query = "select distinct ItemType from PlaybackActivity";
-                    using (var statement = connection.PrepareStatement(sql_query))
-                    {
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string type = row[0].ToString();
-                            filter_Type_list.Add(type);
-                        }
-                    }
+                    string type = row[0].ToString();
+                    filter_Type_list.Add(type);
                 }
             }
             return filter_Type_list;
@@ -250,78 +230,74 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             _logger.LogInformation("Loading Data");
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                StringReader sr = new StringReader(data);
+
+                string? line = sr?.ReadLine();
+                while (line != null)
                 {
-                    StringReader sr = new StringReader(data);
-
-                    string line = sr.ReadLine();
-                    while (line != null)
+                    string[] tokens = line.Split('\t');
+                    _logger.LogInformation("Line Length : {NumberOfTokens}", tokens.Length);
+                    if (tokens.Length != 9)
                     {
-                        string[] tokens = line.Split('\t');
-                        _logger.LogInformation("Line Length : {NumberOfTokens}", tokens.Length);
-                        if (tokens.Length != 9)
-                        {
-                            line = sr.ReadLine();
-                            continue;
-                        }
-
-                        string date = tokens[0];
-                        string user_id = tokens[1];
-                        string item_id = tokens[2];
-                        string item_type = tokens[3];
-                        string item_name = tokens[4];
-                        string play_method = tokens[5];
-                        string client_name = tokens[6];
-                        string device_name = tokens[7];
-                        string duration = tokens[8];
-
-                        //_logger.LogInformation(date + "\t" + user_id + "\t" + item_id + "\t" + item_type + "\t" + item_name + "\t" + play_method + "\t" + client_name + "\t" + device_name + "\t" + duration);
-
-                        string sql = "select rowid from PlaybackActivity where DateCreated = @DateCreated and UserId = @UserId and ItemId = @ItemId";
-                        using (var statement = connection.PrepareStatement(sql))
-                        {
-
-                            statement.TryBind("@DateCreated", date);
-                            statement.TryBind("@UserId", user_id);
-                            statement.TryBind("@ItemId", item_id);
-                            bool found = false;
-                            foreach (var row in statement.ExecuteQuery())
-                            {
-                                found = true;
-                                break;
-                            }
-
-                            if (found == false)
-                            {
-                                _logger.LogInformation("Not Found, Adding");
-
-                                string sql_add = "insert into PlaybackActivity " +
-                                    "(DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration) " +
-                                    "values " +
-                                    "(@DateCreated, @UserId, @ItemId, @ItemType, @ItemName, @PlaybackMethod, @ClientName, @DeviceName, @PlayDuration)";
-
-                                connection.RunInTransaction(db =>
-                                {
-                                    using (var add_statment = db.PrepareStatement(sql_add))
-                                    {
-                                        add_statment.TryBind("@DateCreated", date);
-                                        add_statment.TryBind("@UserId", user_id);
-                                        add_statment.TryBind("@ItemId", item_id);
-                                        add_statment.TryBind("@ItemType", item_type);
-                                        add_statment.TryBind("@ItemName", item_name);
-                                        add_statment.TryBind("@PlaybackMethod", play_method);
-                                        add_statment.TryBind("@ClientName", client_name);
-                                        add_statment.TryBind("@DeviceName", device_name);
-                                        add_statment.TryBind("@PlayDuration", duration);
-                                        add_statment.MoveNext();
-                                    }
-                                }, TransactionMode);
-                                count++;
-                            }
-                        }
-
-                        line = sr.ReadLine();
+                        line = sr!.ReadLine();
+                        continue;
                     }
+
+                    string date = tokens[0];
+                    string user_id = tokens[1];
+                    string item_id = tokens[2];
+                    string item_type = tokens[3];
+                    string item_name = tokens[4];
+                    string play_method = tokens[5];
+                    string client_name = tokens[6];
+                    string device_name = tokens[7];
+                    string duration = tokens[8];
+
+                    //_logger.LogInformation(date + "\t" + user_id + "\t" + item_id + "\t" + item_type + "\t" + item_name + "\t" + play_method + "\t" + client_name + "\t" + device_name + "\t" + duration);
+
+                    string sql = "select rowid from PlaybackActivity where DateCreated = @DateCreated and UserId = @UserId and ItemId = @ItemId";
+                    using (var statement = connection.PrepareStatement(sql))
+                    {
+
+                        statement.TryBind("@DateCreated", date);
+                        statement.TryBind("@UserId", user_id);
+                        statement.TryBind("@ItemId", item_id);
+                        bool found = false;
+                        foreach (var row in statement.ExecuteQuery())
+                        {
+                            found = true;
+                            break;
+                        }
+
+                        if (found == false)
+                        {
+                            _logger.LogInformation("Not Found, Adding");
+
+                            string sql_add = "insert into PlaybackActivity " +
+                                "(DateCreated, UserId, ItemId, ItemType, ItemName, PlaybackMethod, ClientName, DeviceName, PlayDuration) " +
+                                "values " +
+                                "(@DateCreated, @UserId, @ItemId, @ItemType, @ItemName, @PlaybackMethod, @ClientName, @DeviceName, @PlayDuration)";
+
+                            connection.RunInTransaction(db =>
+                            {
+                                using var add_statment = db.PrepareStatement(sql_add);
+                                add_statment.TryBind("@DateCreated", date);
+                                add_statment.TryBind("@UserId", user_id);
+                                add_statment.TryBind("@ItemId", item_id);
+                                add_statment.TryBind("@ItemType", item_type);
+                                add_statment.TryBind("@ItemName", item_name);
+                                add_statment.TryBind("@PlaybackMethod", play_method);
+                                add_statment.TryBind("@ClientName", client_name);
+                                add_statment.TryBind("@DeviceName", device_name);
+                                add_statment.TryBind("@PlayDuration", duration);
+                                add_statment.MoveNext();
+                            }, TransactionMode);
+                            count++;
+                        }
+                    }
+
+                    line = sr?.ReadLine();
                 }
             }
             return count;
@@ -334,20 +310,16 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             string sql_raw = "SELECT * FROM PlaybackActivity ORDER BY DateCreated";
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql_raw);
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql_raw))
+                    List<string> row_data = new List<string>();
+                    for (int x = 0; x < row.Count; x++)
                     {
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            List<string> row_data = new List<string>();
-                            for (int x = 0; x < row.Count; x++)
-                            {
-                                row_data.Add(row[x].ToString());
-                            }
-                            sw.WriteLine(string.Join("\t", row_data));
-                        }
+                        row_data.Add(row[x].ToString());
                     }
+                    sw.WriteLine(string.Join("\t", row_data));
                 }
             }
             sw.Flush();
@@ -367,13 +339,11 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection())
+                using var connection = CreateConnection();
+                connection.RunInTransaction(db =>
                 {
-                    connection.RunInTransaction(db =>
-                    {
-                        db.Execute(sql);
-                    }, TransactionMode);
-                }
+                    db.Execute(sql);
+                }, TransactionMode);
             }
         }
 
@@ -386,25 +356,21 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection())
+                using var connection = CreateConnection();
+                connection.RunInTransaction(db =>
                 {
-                    connection.RunInTransaction(db =>
-                    {
-                        using (var statement = db.PrepareStatement(sql_add))
-                        {
-                            statement.TryBind("@DateCreated", playInfo.Date.ToDateTimeParamValue());
-                            statement.TryBind("@UserId", playInfo.UserId);
-                            statement.TryBind("@ItemId", playInfo.ItemId);
-                            statement.TryBind("@ItemType", playInfo.ItemType);
-                            statement.TryBind("@ItemName", playInfo.ItemName);
-                            statement.TryBind("@PlaybackMethod", playInfo.PlaybackMethod);
-                            statement.TryBind("@ClientName", playInfo.ClientName);
-                            statement.TryBind("@DeviceName", playInfo.DeviceName);
-                            statement.TryBind("@PlayDuration", playInfo.PlaybackDuration);
-                            statement.MoveNext();
-                        }
-                    }, TransactionMode);
-                }
+                    using var statement = db.PrepareStatement(sql_add);
+                    statement.TryBind("@DateCreated", playInfo.Date.ToDateTimeParamValue());
+                    statement.TryBind("@UserId", playInfo.UserId);
+                    statement.TryBind("@ItemId", playInfo.ItemId);
+                    statement.TryBind("@ItemType", playInfo.ItemType);
+                    statement.TryBind("@ItemName", playInfo.ItemName);
+                    statement.TryBind("@PlaybackMethod", playInfo.PlaybackMethod);
+                    statement.TryBind("@ClientName", playInfo.ClientName);
+                    statement.TryBind("@DeviceName", playInfo.DeviceName);
+                    statement.TryBind("@PlayDuration", playInfo.PlaybackDuration);
+                    statement.MoveNext();
+                }, TransactionMode);
             }
         }
 
@@ -413,20 +379,16 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             string sql_add = "update PlaybackActivity set PlayDuration = @PlayDuration where DateCreated = @DateCreated and UserId = @UserId and ItemId = @ItemId";
             using (WriteLock.Write())
             {
-                using (var connection = CreateConnection())
+                using var connection = CreateConnection();
+                connection.RunInTransaction(db =>
                 {
-                    connection.RunInTransaction(db =>
-                    {
-                        using (var statement = db.PrepareStatement(sql_add))
-                        {
-                            statement.TryBind("@DateCreated", playInfo.Date.ToDateTimeParamValue());
-                            statement.TryBind("@UserId", playInfo.UserId);
-                            statement.TryBind("@ItemId", playInfo.ItemId);
-                            statement.TryBind("@PlayDuration", playInfo.PlaybackDuration);
-                            statement.MoveNext();
-                        }
-                    }, TransactionMode);
-                }
+                    using var statement = db.PrepareStatement(sql_add);
+                    statement.TryBind("@DateCreated", playInfo.Date.ToDateTimeParamValue());
+                    statement.TryBind("@UserId", playInfo.UserId);
+                    statement.TryBind("@ItemId", playInfo.ItemId);
+                    statement.TryBind("@PlayDuration", playInfo.PlaybackDuration);
+                    statement.MoveNext();
+                }, TransactionMode);
             }
         }
 
@@ -448,31 +410,27 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             List<Dictionary<string, string>> items = new List<Dictionary<string, string>>();
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql_query);
+                statement.TryBind("@date_from", date + " 00:00:00");
+                statement.TryBind("@date_to", date + " 23:59:59");
+                statement.TryBind("@user_id", userId);
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql_query))
+                    Dictionary<string, string> item = new Dictionary<string, string>
                     {
-                        statement.TryBind("@date_from", date + " 00:00:00");
-                        statement.TryBind("@date_to", date + " 23:59:59");
-                        statement.TryBind("@user_id", userId);
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string item_id = row[1].ToString();
+                        ["Time"] = row[0].ReadDateTime().ToLocalTime().ToString("HH:mm"),
+                        ["Id"] = row[1].ToString(),
+                        ["Type"] = row[2].ToString(),
+                        ["ItemName"] = row[3].ToString(),
+                        ["ClientName"] = row[4].ToString(),
+                        ["PlaybackMethod"] = row[5].ToString(),
+                        ["DeviceName"] = row[6].ToString(),
+                        ["PlayDuration"] = row[7].ToString(),
+                        ["RowId"] = row[8].ToString()
+                    };
 
-                            Dictionary<string, string> item = new Dictionary<string, string>();
-                            item["Time"] = row[0].ReadDateTime().ToLocalTime().ToString("HH:mm");
-                            item["Id"] = row[1].ToString();
-                            item["Type"] = row[2].ToString();
-                            item["ItemName"] = row[3].ToString();
-                            item["ClientName"] = row[4].ToString();
-                            item["PlaybackMethod"] = row[5].ToString();
-                            item["DeviceName"] = row[6].ToString();
-                            item["PlayDuration"] = row[7].ToString();
-                            item["RowId"] = row[8].ToString();
-
-                            items.Add(item);
-                        }
-                    }
+                    items.Add(item);
                 }
             }
 
@@ -507,31 +465,27 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
-                {
-                    using (var statement = connection.PrepareStatement(sql_query))
-                    {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql_query);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
 
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string user_id = row[0].ToString();
-                            Dictionary<string, int> uu = null;
-                            if (usage.ContainsKey(user_id))
-                            {
-                                uu = usage[user_id];
-                            }
-                            else
-                            {
-                                uu = new Dictionary<string, int>();
-                                usage.Add(user_id, uu);
-                            }
-                            string date_string = row[1].ToString();
-                            int count_int = row[2].ToInt();
-                            uu.Add(date_string, count_int);
-                        }
+                foreach (var row in statement.ExecuteQuery())
+                {
+                    string user_id = row[0].ToString();
+                    Dictionary<string, int> uu;
+                    if (usage.ContainsKey(user_id))
+                    {
+                        uu = usage[user_id];
                     }
+                    else
+                    {
+                        uu = new Dictionary<string, int>();
+                        usage.Add(user_id, uu);
+                    }
+                    string date_string = row[1].ToString();
+                    int count_int = row[2].ToInt();
+                    uu.Add(date_string, count_int);
                 }
             }
 
@@ -558,37 +512,33 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql))
+                    DateTime date = row[0].ReadDateTime().ToLocalTime();
+                    int duration = row[1].ToInt();
+
+                    int seconds_left_in_hour = 3600 - (date.Minute * 60 + date.Second);
+                    _logger.LogInformation("Processing - date: {Date} duration: {Duration} seconds_left_in_hour {SecondsLeftInHour}", date, duration, seconds_left_in_hour);
+                    while (duration > 0)
                     {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
-
-                        foreach (var row in statement.ExecuteQuery())
+                        string hour_id = (int)date.DayOfWeek + "-" + date.ToString("HH");
+                        if (duration > seconds_left_in_hour)
                         {
-                            DateTime date = row[0].ReadDateTime().ToLocalTime();
-                            int duration = row[1].ToInt();
-
-                            int seconds_left_in_hour = 3600 - (date.Minute * 60 + date.Second);
-                            _logger.LogInformation("Processing - date: {Date} duration: {Duration} seconds_left_in_hour {SecondsLeftInHour}", date, duration, seconds_left_in_hour);
-                            while (duration > 0)
-                            {
-                                string hour_id = (int)date.DayOfWeek + "-" + date.ToString("HH");
-                                if (duration > seconds_left_in_hour)
-                                {
-                                    AddTimeToHours(report_data, hour_id, seconds_left_in_hour);
-                                }
-                                else
-                                {
-                                    AddTimeToHours(report_data, hour_id, duration);
-                                }
-
-                                duration = duration - seconds_left_in_hour;
-                                seconds_left_in_hour = 3600;
-                                date = date.AddHours(1);
-                            }
+                            AddTimeToHours(report_data, hour_id, seconds_left_in_hour);
                         }
+                        else
+                        {
+                            AddTimeToHours(report_data, hour_id, duration);
+                        }
+
+                        duration -= seconds_left_in_hour;
+                        seconds_left_in_hour = 3600;
+                        date = date.AddHours(1);
                     }
                 }
             }
@@ -625,26 +575,22 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql))
-                    {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+                    string item_label = row[0].ToString();
+                    int action_count = row[1].ToInt();
+                    int seconds_sum = row[2].ToInt();
 
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string item_label = row[0].ToString();
-                            int action_count = row[1].ToInt();
-                            int seconds_sum = row[2].ToInt();
-
-                            Dictionary<string, object> row_data = new Dictionary<string, object>
+                    Dictionary<string, object> row_data = new Dictionary<string, object>
                             {
                                 {"label", item_label}, {"count", action_count}, {"time", seconds_sum}
                             };
-                            report.Add(row_data);
-                        }
-                    }
+                    report.Add(row_data);
                 }
             }
 
@@ -681,20 +627,16 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
-                {
-                    using (var statement = connection.PrepareStatement(sql))
-                    {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
 
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            int block_num = row[0].ToInt();
-                            int count = row[1].ToInt();
-                            report.Add(block_num, count);
-                        }
-                    }
+                foreach (var row in statement.ExecuteQuery())
+                {
+                    int block_num = row[0].ToInt();
+                    int count = row[1].ToInt();
+                    report.Add(block_num, count);
                 }
             }
 
@@ -719,26 +661,24 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql))
+                    string item_label = row[0].ToString();
+                    int action_count = row[1].ToInt();
+                    int seconds_sum = row[2].ToInt();
+
+                    Dictionary<string, object> row_data = new Dictionary<string, object>
                     {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
-
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string item_label = row[0].ToString();
-                            int action_count = row[1].ToInt();
-                            int seconds_sum = row[2].ToInt();
-
-                            Dictionary<string, object> row_data = new Dictionary<string, object>();
-                            row_data.Add("label", item_label);
-                            row_data.Add("count", action_count);
-                            row_data.Add("time", seconds_sum);
-                            report.Add(row_data);
-                        }
-                    }
+                        { "label", item_label },
+                        { "count", action_count },
+                        { "time", seconds_sum }
+                    };
+                    report.Add(row_data);
                 }
             }
 
@@ -763,26 +703,22 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql))
-                    {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+                    string item_label = row[0].ToString();
+                    int action_count = row[1].ToInt();
+                    int seconds_sum = row[2].ToInt();
 
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            string item_label = row[0].ToString();
-                            int action_count = row[1].ToInt();
-                            int seconds_sum = row[2].ToInt();
-
-                            Dictionary<string, object> row_data = new Dictionary<string, object>
+                    Dictionary<string, object> row_data = new Dictionary<string, object>
                             {
                                 {"label", item_label}, {"count", action_count}, {"time", seconds_sum}
                             };
-                            report.Add(row_data);
-                        }
-                    }
+                    report.Add(row_data);
                 }
             }
 
@@ -809,37 +745,33 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             using (WriteLock.Read())
             {
-                using (var connection = CreateConnection(true))
+                using var connection = CreateConnection(true);
+                using var statement = connection.PrepareStatement(sql);
+                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
+                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+
+                foreach (var row in statement.ExecuteQuery())
                 {
-                    using (var statement = connection.PrepareStatement(sql))
-                    {
-                        statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                        statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+                    Dictionary<string, object> row_data = new Dictionary<string, object>();
 
-                        foreach (var row in statement.ExecuteQuery())
-                        {
-                            Dictionary<string, object> row_data = new Dictionary<string, object>();
+                    DateTime latest_date = row[0].ReadDateTime().ToLocalTime();
+                    row_data.Add("latest_date", latest_date);
 
-                            DateTime latest_date = row[0].ReadDateTime().ToLocalTime();
-                            row_data.Add("latest_date", latest_date);
+                    string user_id = row[1].ToString();
+                    row_data.Add("user_id", user_id);
 
-                            string user_id = row[1].ToString();
-                            row_data.Add("user_id", user_id);
+                    int action_count = row[2].ToInt();
+                    int seconds_sum = row[3].ToInt();
+                    row_data.Add("total_count", action_count);
+                    row_data.Add("total_time", seconds_sum);
 
-                            int action_count = row[2].ToInt();
-                            int seconds_sum = row[3].ToInt();
-                            row_data.Add("total_count", action_count);
-                            row_data.Add("total_time", seconds_sum);
+                    string item_name = row[4].ToString();
+                    row_data.Add("item_name", item_name);
 
-                            string item_name = row[4].ToString();
-                            row_data.Add("item_name", item_name);
+                    string client_name = row[5].ToString();
+                    row_data.Add("client_name", client_name);
 
-                            string client_name = row[5].ToString();
-                            row_data.Add("client_name", client_name);
-
-                            report.Add(row_data);
-                        }
-                    }
+                    report.Add(row_data);
                 }
             }
 

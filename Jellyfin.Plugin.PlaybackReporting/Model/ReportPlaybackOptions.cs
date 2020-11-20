@@ -19,7 +19,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
     public class ReportPlaybackOptions
     {
         public int MaxDataAge { set; get; } = 3;
-        public string BackupPath { set; get; }
+        public string BackupPath { set; get; } = string.Empty;
         public int MaxBackupFiles { set; get; } = 5;
     }
 }

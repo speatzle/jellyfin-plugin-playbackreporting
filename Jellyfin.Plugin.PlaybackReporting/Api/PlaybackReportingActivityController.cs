@@ -164,10 +164,12 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             foreach (var jellyfinUser in _userManager.Users)
             {
-                Dictionary<string, object> user_info = new Dictionary<string, object>();
-                user_info.Add("name", jellyfinUser.Username);
-                user_info.Add("id", jellyfinUser.Id.ToString("N"));
-                user_info.Add("in_list", userIdList.Contains(jellyfinUser.Id.ToString("N")));
+                Dictionary<string, object> user_info = new Dictionary<string, object>
+                {
+                    { "name", jellyfinUser.Username },
+                    { "id", jellyfinUser.Id.ToString("N") },
+                    { "in_list", userIdList.Contains(jellyfinUser.Id.ToString("N")) }
+                };
                 users.Add(user_info);
             }
 
@@ -186,7 +188,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromRoute] string filter)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -198,17 +200,18 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             foreach (Dictionary<string, string> item_data in results)
             {
-                Dictionary<string, object> item_info = new Dictionary<string, object>();
-
-                item_info["Time"] = item_data["Time"];
-                item_info["Id"] = item_data["Id"];
-                item_info["Name"] = item_data["ItemName"];
-                item_info["Type"] = item_data["Type"];
-                item_info["Client"] = item_data["ClientName"];
-                item_info["Method"] = item_data["PlaybackMethod"];
-                item_info["Device"] = item_data["DeviceName"];
-                item_info["Duration"] = item_data["PlayDuration"];
-                item_info["RowId"] = item_data["RowId"];
+                Dictionary<string, object> item_info = new Dictionary<string, object>
+                {
+                    ["Time"] = item_data["Time"],
+                    ["Id"] = item_data["Id"],
+                    ["Name"] = item_data["ItemName"],
+                    ["Type"] = item_data["Type"],
+                    ["Client"] = item_data["ClientName"],
+                    ["Method"] = item_data["PlaybackMethod"],
+                    ["Device"] = item_data["DeviceName"],
+                    ["Duration"] = item_data["PlayDuration"],
+                    ["RowId"] = item_data["RowId"]
+                };
 
                 user_activity.Add(item_info);
             }
@@ -279,7 +282,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult GetUsageStats(int days, DateTime? endDate, string filter, string dataType)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -330,15 +333,17 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
                     }
                 }
 
-                Dictionary<string, object> user_data = new Dictionary<string, object>();
-                user_data.Add("user_id", user_id);
-                user_data.Add("user_name", user_name);
-                user_data.Add("user_usage", userUsageByDate);
+                Dictionary<string, object> user_data = new Dictionary<string, object>
+                {
+                    { "user_id", user_id },
+                    { "user_name", user_name },
+                    { "user_usage", userUsageByDate }
+                };
 
                 user_usage_data.Add(user_data);
             }
 
-            var sorted_data = user_usage_data.OrderBy(dict => (dict["user_name"] as string).ToLower());
+            var sorted_data = user_usage_data.OrderBy(dict => (dict["user_name"] as string)?.ToLower());
 
             return Ok(sorted_data);
         }
@@ -354,7 +359,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult GetHourlyReport(int days, DateTime? endDate, string filter)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -429,7 +434,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         [ProducesResponseType(StatusCodes.Status200OK)]
         public ActionResult GetDurationHistogramReport(int days, DateTime? endDate, string filter)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -545,7 +550,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             return responce;
         }
 
-        private string GetLastSeenString(TimeSpan span)
+        private static string GetLastSeenString(TimeSpan span)
         {
             String last_seen = "";
 
@@ -577,7 +582,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             return last_seen;
         }
 
-        private string GetTimePart(int value, string name)
+        private static string GetTimePart(int value, string name)
         {
             string part = value + " " + name;
             if (value > 1)
