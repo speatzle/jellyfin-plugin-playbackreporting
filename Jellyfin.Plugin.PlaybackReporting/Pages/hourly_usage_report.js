@@ -362,7 +362,11 @@ const getConfigurationPageUrl = (name) => {
 
             LibraryMenu.setTabs('playback_reporting', 3, getTabs);
 
-            import('./Chart.bundle.min.js').then(({default: d3}) => {
+            import(
+                window.ApiClient.getUrl("web/ConfigurationPage", {
+                  name: "Chart.bundle.min.js",
+                })
+            ).then(({default: d3}) => {
 
                 var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
                 console.log("loading types form : " + filter_url);

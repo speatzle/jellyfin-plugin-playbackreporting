@@ -254,8 +254,11 @@ const getConfigurationPageUrl = (name) => {
 
             LibraryMenu.setTabs('playback_reporting', 2, getTabs);
 
-            import('./Chart.bundle.min.js').then(({default: d3}) => {
-
+            import(
+                window.ApiClient.getUrl("web/ConfigurationPage", {
+                  name: "Chart.bundle.min.js",
+                })
+            ).then(({default: d3}) => {
                 var end_date = view.querySelector('#end_date');
                 end_date.value = new Date().toDateInputValue();
                 end_date.addEventListener("change", process_click);

@@ -160,8 +160,11 @@ const getConfigurationPageUrl = (name) => {
 
             LibraryMenu.setTabs('Jellyfin.Plugin.PlaybackReporting', 4, getTabs);
 
-            import('./Chart.bundle.min.js').then(({default: d3}) => {
-
+            import(
+                window.ApiClient.getUrl("web/ConfigurationPage", {
+                  name: "Chart.bundle.min.js",
+                })
+            ).then(({default: d3}) => {
                 // get filter types form sever
                 var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
                 console.log("loading types form : " + filter_url);
