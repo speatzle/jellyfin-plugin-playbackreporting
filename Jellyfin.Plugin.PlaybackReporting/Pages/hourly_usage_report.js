@@ -36,7 +36,7 @@ const getConfigurationPageUrl = (name) => {
             url: url_to_get,
             dataType: "json"
         });
-    };	
+    };
 
     function precisionRound(number, precision) {
         var factor = Math.pow(10, precision);
@@ -366,7 +366,7 @@ const getConfigurationPageUrl = (name) => {
                 window.ApiClient.getUrl("web/ConfigurationPage", {
                   name: "Chart.bundle.min.js",
                 })
-            ).then(({default: d3}) => {
+            ).then((d3) => {
 
                 var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
                 console.log("loading types form : " + filter_url);
@@ -410,7 +410,7 @@ const getConfigurationPageUrl = (name) => {
                         var days = parseInt(weeks.value) * 7;
                         //Set days filter to 50 years if 'all' option is selected.
                         if (days == -7) days = 18250;
-                        
+
                         var url = "user_usage_stats/HourlyReport?days=" + days + "&end_date=" + end_date.value + "&filter=" + filter.join(",") + "&stamp=" + new Date().getTime();
                         url = window.ApiClient.getUrl(url);
                         window.ApiClient.getUserActivity(url).then(function (usage_data) {

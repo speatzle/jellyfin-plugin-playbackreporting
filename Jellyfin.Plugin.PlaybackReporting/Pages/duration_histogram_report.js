@@ -164,13 +164,13 @@ const getConfigurationPageUrl = (name) => {
                 window.ApiClient.getUrl("web/ConfigurationPage", {
                   name: "Chart.bundle.min.js",
                 })
-            ).then(({default: d3}) => {
+            ).then((d3) => {
                 // get filter types form sever
                 var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
                 console.log("loading types form : " + filter_url);
                 window.ApiClient.getUserActivity(filter_url).then(function (filter_data) {
                     filter_names = filter_data;
-                    
+
                     // build filter list
                     var filter_items = "";
                     for (var x1 = 0; x1 < filter_names.length; x1++) {
@@ -204,9 +204,9 @@ const getConfigurationPageUrl = (name) => {
                                 filter.push(filter_name);
                             }
                         }
-                        
+
                         var days = parseInt(weeks.value) * 7;
-                        //Set days filter to 50 years if 'all' option is selected. 
+                        //Set days filter to 50 years if 'all' option is selected.
                         if (days == -7) days = 18250;
 
                         var url = "user_usage_stats/DurationHistogramReport?days=" + days + "&end_date=" + end_date.value + "&filter=" + filter.join(",") + "&stamp=" + new Date().getTime();

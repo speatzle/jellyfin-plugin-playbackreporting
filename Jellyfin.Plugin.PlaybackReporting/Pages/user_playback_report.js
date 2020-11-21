@@ -458,12 +458,12 @@ const getConfigurationPageUrl = (name) => {
                 window.ApiClient.getUrl("web/ConfigurationPage", {
                   name: "Chart.bundle.min.js",
                 })
-            ).then(({default: d3}) => {
+            ).then((d3) => {
                 // get filter types form sever
                 var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
                 window.ApiClient.getUserActivity(filter_url).then(function (filter_data) {
                     filter_names = filter_data;
-                
+
                     // build filter list
                     var filter_items = "";
                     for (var x = 0; x < filter_names.length; x++) {
@@ -511,10 +511,10 @@ const getConfigurationPageUrl = (name) => {
                         }
 
                         var data_t = data_type.options[data_type.selectedIndex].value;
-                        
+
                         /* Since the graph renders each day, rendering all the data does not make sense for this graph. Maybe figure out a way to combine data into months? */
                         days = parseInt(weeks.value) * 7;
-                        
+
 
                         var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=" + data_t + "&stamp=" + new Date().getTime();
                         filtered_url = window.ApiClient.getUrl(filtered_url);

@@ -25,7 +25,7 @@ const getConfigurationPageUrl = (name) => {
             url: url_to_get,
             dataType: "json"
         });
-    };	
+    };
 
     function setBackupPathCallBack(selectedDir, view) {
         window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
@@ -101,7 +101,7 @@ const getConfigurationPageUrl = (name) => {
     }
 
     function loadBackupFile(selectedFile, view) {
-        var encoded_path = encodeURI(selectedFile); 
+        var encoded_path = encodeURI(selectedFile);
         var url = "user_usage_stats/load_backup?backupfile=" + encoded_path + "&stamp=" + new Date().getTime();
         url = window.ApiClient.getUrl(url);
         window.ApiClient.getUserActivity(url).then(function (responce_message) {
@@ -213,13 +213,13 @@ const getConfigurationPageUrl = (name) => {
             // remove unknown users button
             var remove_unknown_button = view.querySelector('#remove_unknown_button');
             remove_unknown_button.addEventListener("click", function () {
-                var url = "user_usage_stats/user_manage/remove_unknown/none" + "?stamp=" + new Date().getTime();
+                var url = "user_usage_stats/user_manage/prune" + "?stamp=" + new Date().getTime();
                 url = window.ApiClient.getUrl(url);
                 window.ApiClient.getUserActivity(url).then(function (result) {
                     alert("Unknown user activity removed.");
                 });
 
-            });            
+            });
 
             window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
                 loadPage(view, config);
@@ -231,20 +231,20 @@ const getConfigurationPageUrl = (name) => {
             add_button.addEventListener("click", function () {
                 var add_user_list = view.querySelector('#user_list_for_add');
                 var selected_user_id = add_user_list.options[add_user_list.selectedIndex].value;
-                var url = "user_usage_stats/user_manage/add/" + selected_user_id + "?stamp=" + new Date().getTime();
+                var url = "user_usage_stats/user_manage/add?id=" + selected_user_id + "&stamp=" + new Date().getTime();
                 url = window.ApiClient.getUrl(url);
                 window.ApiClient.getUserActivity(url).then(function (result) {
                     //alert(result);
                     showUserList(view);
                 });
-                
+
             });
 
             var remove_button = view.querySelector('#remove_user_from_list');
             remove_button.addEventListener("click", function () {
                 var add_user_list = view.querySelector('#user_list_for_add');
                 var selected_user_id = add_user_list.options[add_user_list.selectedIndex].value;
-                var url = "user_usage_stats/user_manage/remove/" + selected_user_id + "?stamp=" + new Date().getTime();
+                var url = "user_usage_stats/user_manage/remove?id=" + selected_user_id + "&stamp=" + new Date().getTime();
                 url = window.ApiClient.getUrl(url);
                 window.ApiClient.getUserActivity(url).then(function (result) {
                     //alert(result);

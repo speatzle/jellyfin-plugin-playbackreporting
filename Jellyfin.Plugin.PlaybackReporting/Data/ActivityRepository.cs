@@ -82,7 +82,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                     _logger.LogInformation("Received : {ActualSchema}", actual_schema);
                 }
 
-                // ROWID 
+                // ROWID
                 connection.Execute("create table if not exists PlaybackActivity (" +
                                 "DateCreated DATETIME NOT NULL, " +
                                 "UserId TEXT, " +
@@ -437,7 +437,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             return items;
         }
 
-        public Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime endDate, string[] types, string dataType)
+        public Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime endDate, string[] types, string? dataType)
         {
             List<string> filters = new List<string>();
             foreach (string filter in types)
@@ -600,8 +600,8 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         public SortedDictionary<int, int> GetDurationHistogram(int days, DateTime endDate, string[] types)
         {
             /*
-            SELECT CAST(PlayDuration / 300 as int) AS FiveMinBlock, COUNT(1) ActionCount 
-            FROM PlaybackActivity 
+            SELECT CAST(PlayDuration / 300 as int) AS FiveMinBlock, COUNT(1) ActionCount
+            FROM PlaybackActivity
             GROUP BY CAST(PlayDuration / 300 as int)
             ORDER BY CAST(PlayDuration / 300 as int) ASC;
             */

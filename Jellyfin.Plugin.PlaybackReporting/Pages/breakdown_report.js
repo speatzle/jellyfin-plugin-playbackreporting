@@ -93,7 +93,7 @@ const getConfigurationPageUrl = (name) => {
 
         function tooltip_labels(tooltipItem, data) {
 
-            var indice = tooltipItem.index; 
+            var indice = tooltipItem.index;
             var label = data.labels[indice] || "";
 
             if (label) {
@@ -258,7 +258,7 @@ const getConfigurationPageUrl = (name) => {
                 window.ApiClient.getUrl("web/ConfigurationPage", {
                   name: "Chart.bundle.min.js",
                 })
-            ).then(({default: d3}) => {
+            ).then((d3) => {
                 var end_date = view.querySelector('#end_date');
                 end_date.value = new Date().toDateInputValue();
                 end_date.addEventListener("change", process_click);
@@ -272,8 +272,8 @@ const getConfigurationPageUrl = (name) => {
                     var days = parseInt(weeks.value) * 7;
                     //Set days filter to 50 years if 'all' option is selected.
                     if (days == -7) days = 18250;
-                    
-                    
+
+
                     // build user chart
                     var url = "user_usage_stats/UserId/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
                     url = window.ApiClient.getUrl(url);
@@ -315,7 +315,7 @@ const getConfigurationPageUrl = (name) => {
                     });
 
                     // build TvShows chart
-                    var url = "user_usage_stats/TvShowsReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
+                    var url = "user_usage_stats/GetTvShowsReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
                     url = window.ApiClient.getUrl(url);
                     window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
