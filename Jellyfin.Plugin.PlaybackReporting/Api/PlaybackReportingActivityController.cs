@@ -24,6 +24,7 @@ using Jellyfin.Plugin.PlaybackReporting.Data;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.IO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -123,28 +124,47 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         }
 
         /// <summary>
-        /// Performs a user action
+        /// Prune unknown users
         /// </summary>
-        /// <param name="action">Action to perform.</param>
+        /// <returns></returns>
+        [HttpGet("user_manage/prune")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<bool> PruneUnknownUsers()
+        {
+            List<string> userIdList = new List<string>();
+            foreach (var jellyfinUser in _userManager.Users)
+            {
+                userIdList.Add(jellyfinUser.Id.ToString("N"));
+            }
+            _repository.RemoveUnknownUsers(userIdList);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Add user to ignore list
+        /// </summary>
         /// <param name="id">User Id to perform the action on</param>
         /// <returns></returns>
-        [HttpGet("user_mange/{action}/{id}")]
+        [HttpGet("user_manage/add")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<bool> PerformUserAction([FromRoute] string action, [FromRoute] string id)
+        public ActionResult<bool> IgnoreListAdd([FromQuery] string id)
         {
-            if (action == "remove_unknown")
-            {
-                List<string> userIdList = new List<string>();
-                foreach (var jellyfinUser in _userManager.Users)
-                {
-                    userIdList.Add(jellyfinUser.Id.ToString("N"));
-                }
-                _repository.RemoveUnknownUsers(userIdList);
-            }
-            else
-            {
-                _repository.ManageUserList(action, id);
-            }
+            _repository.ManageUserList("add", id);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Remove user to ignore list
+        /// </summary>
+        /// <param name="id">User Id to perform the action on</param>
+        /// <returns></returns>
+        [HttpGet("user_manage/remove")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        public ActionResult<bool> IgnoreListRemove([FromQuery] string id)
+        {
+            _repository.ManageUserList("remove", id);
 
             return true;
         }
@@ -163,10 +183,12 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             foreach (var jellyfinUser in _userManager.Users)
             {
-                Dictionary<string, object> user_info = new Dictionary<string, object>();
-                user_info.Add("name", jellyfinUser.Username);
-                user_info.Add("id", jellyfinUser.Id.ToString("N"));
-                user_info.Add("in_list", userIdList.Contains(jellyfinUser.Id.ToString("N")));
+                Dictionary<string, object> user_info = new Dictionary<string, object>
+                {
+                    { "name", jellyfinUser.Username },
+                    { "id", jellyfinUser.Id.ToString("N") },
+                    { "in_list", userIdList.Contains(jellyfinUser.Id.ToString("N")) }
+                };
                 users.Add(user_info);
             }
 
@@ -183,9 +205,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("{userId}/{date}/GetItems")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromRoute] string filter)
+        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromRoute] string? filter)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -197,17 +219,18 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             foreach (Dictionary<string, string> item_data in results)
             {
-                Dictionary<string, object> item_info = new Dictionary<string, object>();
-
-                item_info["Time"] = item_data["Time"];
-                item_info["Id"] = item_data["Id"];
-                item_info["Name"] = item_data["ItemName"];
-                item_info["Type"] = item_data["Type"];
-                item_info["Client"] = item_data["ClientName"];
-                item_info["Method"] = item_data["PlaybackMethod"];
-                item_info["Device"] = item_data["DeviceName"];
-                item_info["Duration"] = item_data["PlayDuration"];
-                item_info["RowId"] = item_data["RowId"];
+                Dictionary<string, object> item_info = new Dictionary<string, object>
+                {
+                    ["Time"] = item_data["Time"],
+                    ["Id"] = item_data["Id"],
+                    ["Name"] = item_data["ItemName"],
+                    ["Type"] = item_data["Type"],
+                    ["Client"] = item_data["ClientName"],
+                    ["Method"] = item_data["PlaybackMethod"],
+                    ["Device"] = item_data["DeviceName"],
+                    ["Duration"] = item_data["PlayDuration"],
+                    ["RowId"] = item_data["RowId"]
+                };
 
                 user_activity.Add(item_info);
             }
@@ -276,9 +299,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("PlayActivity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUsageStats(int days, DateTime? endDate, string filter, string dataType)
+        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -329,15 +352,17 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
                     }
                 }
 
-                Dictionary<string, object> user_data = new Dictionary<string, object>();
-                user_data.Add("user_id", user_id);
-                user_data.Add("user_name", user_name);
-                user_data.Add("user_usage", userUsageByDate);
+                Dictionary<string, object> user_data = new Dictionary<string, object>
+                {
+                    { "user_id", user_id },
+                    { "user_name", user_name },
+                    { "user_usage", userUsageByDate }
+                };
 
                 user_usage_data.Add(user_data);
             }
 
-            var sorted_data = user_usage_data.OrderBy(dict => (dict["user_name"] as string).ToLower());
+            var sorted_data = user_usage_data.OrderBy(dict => (dict["user_name"] as string)?.ToLower());
 
             return Ok(sorted_data);
         }
@@ -351,9 +376,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("HourlyReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetHourlyReport(int days, DateTime? endDate, string filter)
+        public ActionResult GetHourlyReport(int days, DateTime? endDate, string? filter)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -426,9 +451,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("DurationHistogramReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetDurationHistogramReport(int days, DateTime? endDate, string filter)
+        public ActionResult GetDurationHistogramReport(int days, DateTime? endDate, string? filter)
         {
-            string[] filter_tokens = new string[0];
+            string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
             {
                 filter_tokens = filter.Split(',');
@@ -456,7 +481,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             return Ok(report);
         }
-        
+
         /// <summary>
         /// Gets TV Shows counts.
         /// </summary>
@@ -484,6 +509,12 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             return Ok(_repository.GetMoviesReport(days, endDate ?? DateTime.Now));
         }
 
+        public class CustomQueryData
+        {
+            public string CustomQueryString {get;set;} = "";
+            public bool ReplaceUserId {get;set;} = false;
+
+        }
         /// <summary>
         /// Submit an SQL query.
         /// </summary>
@@ -493,18 +524,18 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpPost("submit_custom_query")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult<Dictionary<string,object>> CustomQuery(string customQueryString, bool replaceUserId)
+        public ActionResult<Dictionary<string,object>> CustomQuery([FromBody] CustomQueryData data)
         {
-            _logger.LogInformation("CustomQuery : {CustomerQueryString}", customQueryString);
+            _logger.LogInformation("CustomQuery : {CustomerQueryString}", data.CustomQueryString);
 
             Dictionary<string, object> responce = new Dictionary<string, object>();
 
             List<List<object>> result = new List<List<object>>();
             List<string> colums = new List<string>();
-            string message = _repository.RunCustomQuery(customQueryString, colums, result);
+            string message = _repository.RunCustomQuery(data.CustomQueryString, colums, result);
 
             int index_of_user_col = colums.IndexOf("UserId");
-            if (replaceUserId && index_of_user_col > -1)
+            if (data.ReplaceUserId && index_of_user_col > -1)
             {
                 colums[index_of_user_col] = "UserName";
 
@@ -524,27 +555,14 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
                 }
             }
 
-
-            /*
-            List<object> row = new List<object>();
-            row.Add("Shaun");
-            row.Add(12);
-            row.Add("Some Date");
-            result.Add(row);
-
-            colums.Add("Name");
-            colums.Add("Age");
-            colums.Add("Started");
-            */
-
             responce.Add("colums", colums);
             responce.Add("results", result);
             responce.Add("message", message);
-            
+
             return responce;
         }
-        
-        private string GetLastSeenString(TimeSpan span)
+
+        private static string GetLastSeenString(TimeSpan span)
         {
             String last_seen = "";
 
@@ -576,7 +594,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
             return last_seen;
         }
 
-        private string GetTimePart(int value, string name)
+        private static string GetTimePart(int value, string name)
         {
             string part = value + " " + name;
             if (value > 1)

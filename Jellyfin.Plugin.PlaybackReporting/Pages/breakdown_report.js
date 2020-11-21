@@ -14,12 +14,13 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see<http://www.gnu.org/licenses/>.
 */
 
-define(['libraryMenu'], function (libraryMenu) {
-    'use strict';
+const getConfigurationPageUrl = (name) => {
+    return 'configurationpage?name=' + encodeURIComponent(name);
+}
 
     var chart_instance_map = {};
 
-    ApiClient.getUserActivity = function (url_to_get) {
+    window.ApiClient.getUserActivity = function (url_to_get) {
         console.log("getUserActivity Url = " + url_to_get);
         return this.ajax({
             type: "GET",
@@ -92,7 +93,7 @@ define(['libraryMenu'], function (libraryMenu) {
 
         function tooltip_labels(tooltipItem, data) {
 
-            var indice = tooltipItem.index; 
+            var indice = tooltipItem.index;
             var label = data.labels[indice] || "";
 
             if (label) {
@@ -216,45 +217,48 @@ define(['libraryMenu'], function (libraryMenu) {
     function getTabs() {
         var tabs = [
             {
-                href: Dashboard.getConfigurationPageUrl('user_report'),
+                href: getConfigurationPageUrl('user_report'),
                 name: 'Users'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('user_playback_report'),
+                href: getConfigurationPageUrl('user_playback_report'),
                 name: 'Playback'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('breakdown_report'),
+                href: getConfigurationPageUrl('breakdown_report'),
                 name: 'Breakdown'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('hourly_usage_report'),
+                href: getConfigurationPageUrl('hourly_usage_report'),
                 name: 'Usage'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('duration_histogram_report'),
+                href: getConfigurationPageUrl('duration_histogram_report'),
                 name: 'Duration'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('custom_query'),
+                href: getConfigurationPageUrl('custom_query'),
                 name: 'Query'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('playback_report_settings'),
+                href: getConfigurationPageUrl('playback_report_settings'),
                 name: 'Settings'
             }];
         return tabs;
     }
 
-    return function (view, params) {
+    export default function (view, params) {
 
         // init code here
         view.addEventListener('viewshow', function (e) {
 
             LibraryMenu.setTabs('playback_reporting', 2, getTabs);
 
-            require([Dashboard.getConfigurationResourceUrl('Chart.bundle.min.js')], function (d3) {
-
+            import(
+                window.ApiClient.getUrl("web/ConfigurationPage", {
+                  name: "Chart.bundle.min.js",
+                })
+            ).then((d3) => {
                 var end_date = view.querySelector('#end_date');
                 end_date.value = new Date().toDateInputValue();
                 end_date.addEventListener("change", process_click);
@@ -268,60 +272,60 @@ define(['libraryMenu'], function (libraryMenu) {
                     var days = parseInt(weeks.value) * 7;
                     //Set days filter to 50 years if 'all' option is selected.
                     if (days == -7) days = 18250;
-                    
-                    
+
+
                     // build user chart
                     var url = "user_usage_stats/UserId/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "User");
                     });
 
                     // build ItemType chart
                     var url = "user_usage_stats/ItemType/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "ItemType");
                     });
 
                     // build PlaybackMethod chart
                     var url = "user_usage_stats/PlaybackMethod/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "PlayMethod");
                     });
 
                     // build ClientName chart
                     var url = "user_usage_stats/ClientName/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "ClientName");
                     });
 
                     // build DeviceName chart
                     var url = "user_usage_stats/DeviceName/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "DeviceName");
                     });
 
                     // build TvShows chart
-                    var url = "user_usage_stats/TvShowsReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    var url = "user_usage_stats/GetTvShowsReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "TvShows");
                     });
 
                     // build Movies chart
                     var url = "user_usage_stats/MoviesReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_chart_user_count(view, d3, data, "Movies");
                     });
@@ -337,4 +341,4 @@ define(['libraryMenu'], function (libraryMenu) {
 
         });
     };
-});
+

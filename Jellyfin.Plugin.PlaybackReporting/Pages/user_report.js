@@ -14,8 +14,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see<http://www.gnu.org/licenses/>.
 */
 
-define(['libraryMenu'], function (libraryMenu) {
-    'use strict';
+const getConfigurationPageUrl = (name) => {
+    return 'configurationpage?name=' + encodeURIComponent(name);
+}
 
     Date.prototype.toDateInputValue = (function () {
         var local = new Date(this);
@@ -23,7 +24,7 @@ define(['libraryMenu'], function (libraryMenu) {
         return local.toJSON().slice(0, 10);
     });
 
-    ApiClient.getUserActivity = function (url_to_get) {
+    window.ApiClient.getUserActivity = function (url_to_get) {
         console.log("getUserActivity Url = " + url_to_get);
         return this.ajax({
             type: "GET",
@@ -35,37 +36,37 @@ define(['libraryMenu'], function (libraryMenu) {
     function getTabs() {
         var tabs = [
             {
-                href: Dashboard.getConfigurationPageUrl('user_report'),
+                href: getConfigurationPageUrl('user_report'),
                 name: 'Users'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('user_playback_report'),
+                href: getConfigurationPageUrl('user_playback_report'),
                 name: 'Playback'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('breakdown_report'),
+                href: getConfigurationPageUrl('breakdown_report'),
                 name: 'Breakdown'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('hourly_usage_report'),
+                href: getConfigurationPageUrl('hourly_usage_report'),
                 name: 'Usage'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('duration_histogram_report'),
+                href: getConfigurationPageUrl('duration_histogram_report'),
                 name: 'Duration'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('custom_query'),
+                href: getConfigurationPageUrl('custom_query'),
                 name: 'Query'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('playback_report_settings'),
+                href: getConfigurationPageUrl('playback_report_settings'),
                 name: 'Settings'
             }];
         return tabs;
     }
 
-    return function (view, params) {
+    export default function (view, params) {
 
         // init code here
         view.addEventListener('viewshow', function (e) {
@@ -87,8 +88,8 @@ define(['libraryMenu'], function (libraryMenu) {
                 if (days == -7) days = 18250;
 
                 var url = "user_usage_stats/user_activity?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                url = ApiClient.getUrl(url);
-                ApiClient.getUserActivity(url).then(function (user_data) {
+                url = window.ApiClient.getUrl(url);
+                window.ApiClient.getUserActivity(url).then(function (user_data) {
                     console.log("usage_data: " + JSON.stringify(user_data));
                     var table_body = view.querySelector('#user_report_results');
                     var row_html = "";
@@ -101,7 +102,7 @@ define(['libraryMenu'], function (libraryMenu) {
                         var user_image = "assets/img/avatar.png";
                         if (user_info.has_image) {
                             user_image = "Users/" + user_info.user_id + "/Images/Primary?width=50";
-                            user_image = ApiClient.getUrl(user_image);
+                            user_image = window.ApiClient.getUrl(user_image);
                         }                      
 
                         row_html += "<td><img src='" + user_image + "' width='50px' style='background-color: black;'></td>";
@@ -129,4 +130,4 @@ define(['libraryMenu'], function (libraryMenu) {
 
         });
     };
-});
+

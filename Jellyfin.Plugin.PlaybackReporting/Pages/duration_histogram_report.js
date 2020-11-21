@@ -14,8 +14,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see<http://www.gnu.org/licenses/>.
 */
 
-define(['libraryMenu'], function (libraryMenu) {
-    'use strict';
+const getConfigurationPageUrl = (name) => {
+    return 'configurationpage?name=' + encodeURIComponent(name);
+}
 
     var my_bar_chart = null;
     var filter_names = [];
@@ -26,7 +27,7 @@ define(['libraryMenu'], function (libraryMenu) {
         return local.toJSON().slice(0, 10);
     });
 
-    ApiClient.getUserActivity = function (url_to_get) {
+    window.ApiClient.getUserActivity = function (url_to_get) {
         console.log("getUserActivity Url = " + url_to_get);
         return this.ajax({
             type: "GET",
@@ -122,51 +123,54 @@ define(['libraryMenu'], function (libraryMenu) {
     function getTabs() {
         var tabs = [
             {
-                href: Dashboard.getConfigurationPageUrl('user_report'),
+                href: getConfigurationPageUrl('user_report'),
                 name: 'Users'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('user_playback_report'),
+                href: getConfigurationPageUrl('user_playback_report'),
                 name: 'Playback'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('breakdown_report'),
+                href: getConfigurationPageUrl('breakdown_report'),
                 name: 'Breakdown'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('hourly_usage_report'),
+                href: getConfigurationPageUrl('hourly_usage_report'),
                 name: 'Usage'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('duration_histogram_report'),
+                href: getConfigurationPageUrl('duration_histogram_report'),
                 name: 'Duration'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('custom_query'),
+                href: getConfigurationPageUrl('custom_query'),
                 name: 'Query'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('playback_report_settings'),
+                href: getConfigurationPageUrl('playback_report_settings'),
                 name: 'Settings'
             }];
         return tabs;
     }
 
-    return function (view, params) {
+    export default function (view, params) {
 
         // init code here
         view.addEventListener('viewshow', function (e) {
 
             LibraryMenu.setTabs('Jellyfin.Plugin.PlaybackReporting', 4, getTabs);
 
-            require([Dashboard.getConfigurationResourceUrl('Chart.bundle.min.js')], function (d3) {
-
+            import(
+                window.ApiClient.getUrl("web/ConfigurationPage", {
+                  name: "Chart.bundle.min.js",
+                })
+            ).then((d3) => {
                 // get filter types form sever
-                var filter_url = ApiClient.getUrl("user_usage_stats/type_filter_list");
+                var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
                 console.log("loading types form : " + filter_url);
-                ApiClient.getUserActivity(filter_url).then(function (filter_data) {
+                window.ApiClient.getUserActivity(filter_url).then(function (filter_data) {
                     filter_names = filter_data;
-                    
+
                     // build filter list
                     var filter_items = "";
                     for (var x1 = 0; x1 < filter_names.length; x1++) {
@@ -200,14 +204,14 @@ define(['libraryMenu'], function (libraryMenu) {
                                 filter.push(filter_name);
                             }
                         }
-                        
+
                         var days = parseInt(weeks.value) * 7;
-                        //Set days filter to 50 years if 'all' option is selected. 
+                        //Set days filter to 50 years if 'all' option is selected.
                         if (days == -7) days = 18250;
 
                         var url = "user_usage_stats/DurationHistogramReport?days=" + days + "&end_date=" + end_date.value + "&filter=" + filter.join(",") + "&stamp=" + new Date().getTime();
-                        url = ApiClient.getUrl(url);
-                        ApiClient.getUserActivity(url).then(function (usage_data) {
+                        url = window.ApiClient.getUrl(url);
+                        window.ApiClient.getUserActivity(url).then(function (usage_data) {
                             //alert("Loaded Data: " + JSON.stringify(usage_data));
                             draw_graph(view, d3, usage_data);
                         });
@@ -227,4 +231,3 @@ define(['libraryMenu'], function (libraryMenu) {
 
         });
     };
-});

@@ -28,7 +28,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
     // TODO use the _same_ implementation from core???
     public abstract class BaseSqliteRepository : IDisposable
     {
-        protected string DbFilePath { get; set; }
+        protected string? DbFilePath { get; set; }
         protected ReaderWriterLockSlim WriteLock;
 
         protected ILogger<BaseSqliteRepository> Logger { get; private set; }
@@ -40,7 +40,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             WriteLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
         }
 
-        protected TransactionMode TransactionMode
+        protected static TransactionMode TransactionMode
         {
             get { return TransactionMode.Deferred; }
         }
@@ -51,23 +51,23 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             SQLite3.EnableSharedCache = false;
 
-            int rc = raw.sqlite3_config(raw.SQLITE_CONFIG_MEMSTATUS, 0);
+            _ = raw.sqlite3_config(raw.SQLITE_CONFIG_MEMSTATUS, 0);
             //CheckOk(rc);
 
-            rc = raw.sqlite3_config(raw.SQLITE_CONFIG_MULTITHREAD, 1);
+            _ = raw.sqlite3_config(raw.SQLITE_CONFIG_MULTITHREAD, 1);
             //rc = raw.sqlite3_config(raw.SQLITE_CONFIG_SINGLETHREAD, 1);
             //rc = raw.sqlite3_config(raw.SQLITE_CONFIG_SERIALIZED, 1);
             //CheckOk(rc);
 
-            rc = raw.sqlite3_enable_shared_cache(1);
+            _ = raw.sqlite3_enable_shared_cache(1);
 
             ThreadSafeMode = raw.sqlite3_threadsafe();
         }
 
         private static bool _versionLogged;
 
-        private string _defaultWal;
-        protected ManagedConnection _connection;
+        private string? _defaultWal;
+        protected ManagedConnection? _connection;
 
         protected virtual bool EnableSingleConnection
         {
@@ -236,7 +236,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
     {
         private sealed class WriteLockToken : IDisposable
         {
-            private ReaderWriterLockSlim _sync;
+            private readonly ReaderWriterLockSlim _sync;
             public WriteLockToken(ReaderWriterLockSlim sync)
             {
                 _sync = sync;
@@ -247,7 +247,6 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                 if (_sync != null)
                 {
                     _sync.ExitWriteLock();
-                    _sync = null;
                 }
             }
         }

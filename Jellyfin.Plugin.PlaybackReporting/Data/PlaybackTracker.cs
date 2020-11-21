@@ -24,7 +24,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
     public class PlaybackTracker
     {
         private bool IsPaused;
-        public PlaybackInfo TrackedPlaybackInfo { set; get; }
+        public PlaybackInfo? TrackedPlaybackInfo { set; get; }
         private readonly ILogger<PlaybackTracker> _logger;
         private readonly List<KeyValuePair<DateTime, ActionType>> event_tracking = new List<KeyValuePair<DateTime, ActionType>>();
         public DateTime LastUpdated = DateTime.MinValue;
@@ -93,7 +93,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             List<KeyValuePair<DateTime, ActionType>> events;
             // if the last event is not a stop event then add one to allow duration calculation to work
-            if (event_tracking.Count > 0 && event_tracking[event_tracking.Count - 1].Value != ActionType.STOP)
+            if (event_tracking.Count > 0 && event_tracking[^1].Value != ActionType.STOP)
             {
                 events = new List<KeyValuePair<DateTime, ActionType>>();
                 foreach (KeyValuePair<DateTime, ActionType> e in event_tracking)

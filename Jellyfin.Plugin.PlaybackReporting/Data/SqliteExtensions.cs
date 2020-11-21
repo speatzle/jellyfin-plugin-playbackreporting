@@ -82,8 +82,8 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
       "yy-MM-dd"
     };
 
-        private static string _datetimeFormatUtc = _datetimeFormats[5];
-        private static string _datetimeFormatLocal = _datetimeFormats[19];
+        private static readonly string _datetimeFormatUtc = _datetimeFormats[5];
+        private static readonly string _datetimeFormatLocal = _datetimeFormats[19];
 
         public static DateTime ReadDateTime(this IResultSetValue result)
         {
@@ -107,8 +107,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
         public static void TryBind(this IStatement statement, string name, string value)
         {
-            IBindParameter bindParam;
-            if (statement.BindParameters.TryGetValue(name, out bindParam))
+            if (statement.BindParameters.TryGetValue(name, out IBindParameter? bindParam))
             {
                 if (value == null)
                 {
@@ -127,8 +126,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
         public static void TryBind(this IStatement statement, string name, int value)
         {
-            IBindParameter bindParam;
-            if (statement.BindParameters.TryGetValue(name, out bindParam))
+            if (statement.BindParameters.TryGetValue(name, out IBindParameter? bindParam))
             {
                 bindParam.Bind(value);
             }

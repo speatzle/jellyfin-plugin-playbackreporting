@@ -39,9 +39,8 @@ namespace Jellyfin.Plugin.PlaybackReporting
         private readonly ILogger<EventMonitorEntryPoint> _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IFileSystem _fileSystem;
-
-        private Dictionary<string, PlaybackTracker> playback_trackers = null;
-        private IActivityRepository _repository;
+        private readonly Dictionary<string, PlaybackTracker>? playback_trackers = null;
+        private IActivityRepository? _repository;
 
         public EventMonitorEntryPoint(
             ISessionManager sessionManager,
@@ -59,7 +58,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
         public void Dispose()
         {
-
+            GC.SuppressFinalize(this);
         }
 
         public Task RunAsync()
@@ -69,16 +68,16 @@ namespace Jellyfin.Plugin.PlaybackReporting
             repo.Initialize();
             _repository = repo;
 
-            _sessionManager.PlaybackStart += _sessionManager_PlaybackStart;
-            _sessionManager.PlaybackStopped += _sessionManager_PlaybackStop;
-            _sessionManager.PlaybackProgress += _sessionManager_PlaybackProgress;
+            _sessionManager.PlaybackStart += SessionManager_PlaybackStart;
+            _sessionManager.PlaybackStopped += SessionManager_PlaybackStop;
+            _sessionManager.PlaybackProgress += SessionManager_PlaybackProgress;
 
             return Task.CompletedTask;
         }
 
-        void _sessionManager_PlaybackProgress(object sender, PlaybackProgressEventArgs e)
+        private void SessionManager_PlaybackProgress(object? sender, PlaybackProgressEventArgs e)
         {
-            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item.Id.ToString("N");
+            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 try
@@ -96,7 +95,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                         }
                         if (tracker.TrackedPlaybackInfo != null)
                         {
-                            _repository.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
+                            _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
                         }
                     }
                 }
@@ -112,10 +111,10 @@ namespace Jellyfin.Plugin.PlaybackReporting
             }
         }
 
-        void _sessionManager_PlaybackStop(object sender, PlaybackStopEventArgs e)
+        private void SessionManager_PlaybackStop(object? sender, PlaybackStopEventArgs e)
         {
-            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item.Id.ToString("N");
-            if (playback_trackers.ContainsKey(key))
+            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+            if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 _logger.LogInformation("Playback stop tracker found, processing stop : {Key}", key);
                 PlaybackTracker tracker = playback_trackers[key];
@@ -129,7 +128,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 if (tracker.TrackedPlaybackInfo != null)
                 {
                     _logger.LogInformation("Saving playback tracking activity in DB");
-                    _repository.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
+                    _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
                 }
                 else
                 {
@@ -145,7 +144,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             }
         }
 
-        void _sessionManager_PlaybackStart(object sender, PlaybackProgressEventArgs e)
+        private void SessionManager_PlaybackStart(object? sender, PlaybackProgressEventArgs e)
         {
             if (e.MediaInfo == null)
             {
@@ -164,7 +163,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             }
 
             string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
-            if (playback_trackers.ContainsKey(key))
+            if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 _logger.LogInformation("Existing tracker found! : " + key);
 
@@ -178,7 +177,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                     {
                         _logger.LogDebug("CalculateDuration : {Events}", string.Join("", event_log));
                     }
-                    _repository.UpdatePlaybackAction(track.TrackedPlaybackInfo);
+                    _repository?.UpdatePlaybackAction(track.TrackedPlaybackInfo);
                 }
 
                 _logger.LogInformation("Removing existing tracker : " + key);
@@ -188,7 +187,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             _logger.LogInformation("Adding playback tracker : " + key);
             PlaybackTracker tracker = new PlaybackTracker(_loggerFactory.CreateLogger<PlaybackTracker>());
             tracker.ProcessStart(e);
-            playback_trackers.Add(key, tracker);
+            playback_trackers?.Add(key, tracker);
 
             // start a task to report playback started
             _logger.LogInformation("Creating StartPlaybackTimer Task");
@@ -264,33 +263,32 @@ namespace Jellyfin.Plugin.PlaybackReporting
                     _logger.LogInformation("StartPlaybackTimer : ItemId               = {ItemId}", item_id);
                     _logger.LogInformation("StartPlaybackTimer : ItemType             = {ItemType}", item_type);
 
-                    PlaybackInfo play_info = new PlaybackInfo
-                    {
-                        Id = Guid.NewGuid().ToString("N"),
-                        Date = DateTime.Now,
-                        ClientName = e.ClientName,
-                        DeviceName = e.DeviceName,
-                        PlaybackMethod = play_method,
-                        UserId = event_user_id,
-                        ItemId = item_id,
-                        ItemName = item_name,
-                        ItemType = item_type
-                    };
+                    PlaybackInfo play_info = new PlaybackInfo(
+                        id: Guid.NewGuid().ToString("N"),
+                        date: DateTime.Now,
+                        clientName: e.ClientName,
+                        deviceName: e.DeviceName,
+                        playbackMethod: play_method,
+                        userId: event_user_id,
+                        itemId: item_id,
+                        itemName: item_name,
+                        itemType: item_type
+                    );
 
                     if (event_playing_id == session_playing_id && event_user_id == session_user_id)
                     {
                         _logger.LogInformation("StartPlaybackTimer : All matches, playback registered");
 
                         // update tracker with playback info
-                        string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item.Id.ToString("N");
-                        if (playback_trackers.ContainsKey(key))
+                        string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+                        if (playback_trackers != null && playback_trackers.ContainsKey(key))
                         {
                             _logger.LogInformation("Playback tracker found, adding playback info : {Key}", key);
                             PlaybackTracker tracker = playback_trackers[key];
                             tracker.TrackedPlaybackInfo = play_info;
 
                             _logger.LogInformation("Saving playback tracking activity in DB");
-                            _repository.AddPlaybackAction(tracker.TrackedPlaybackInfo);
+                            _repository?.AddPlaybackAction(tracker.TrackedPlaybackInfo);
                         }
                         else
                         {
@@ -315,7 +313,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             _logger.LogInformation("StartPlaybackTimer : Exited");
         }
 
-        private string GetItemName(BaseItem item)
+        private static string GetItemName(BaseItem item)
         {
             string item_name = "Not Known";
 
@@ -326,8 +324,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
             if (typeof(Episode) == item.GetType())
             {
-                Episode epp_item = item as Episode;
-                if (epp_item != null)
+                if (item is Episode epp_item)
                 {
                     string season_no = "00";
                     if (epp_item.Season != null && epp_item.Season.IndexNumber != null)
@@ -344,7 +341,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
             }
             else if (typeof(Audio) == item.GetType())
             {
-                Audio audio_item = item as Audio;
+                Audio? audio_item = item as Audio;
                 string artist = "Not Known";
                 var albumArtists = audio_item?.AlbumArtists;
                 if (albumArtists != null && albumArtists.Count > 0)
