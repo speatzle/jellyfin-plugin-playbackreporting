@@ -14,9 +14,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see<http://www.gnu.org/licenses/>.
 */
 
-define(['libraryMenu'], function (libraryMenu) {
-    'use strict';
-
+const getConfigurationPageUrl = (name) => {
+    return 'configurationpage?name=' + encodeURIComponent(name);
+}
 
     ApiClient.sendCustomQuery = function (url_to_get, query_data) {
         var post_data = JSON.stringify(query_data);
@@ -34,37 +34,37 @@ define(['libraryMenu'], function (libraryMenu) {
     function getTabs() {
         var tabs = [
             {
-                href: Dashboard.getConfigurationPageUrl('user_report'),
+                href: getConfigurationPageUrl('user_report'),
                 name: 'Users'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('user_playback_report'),
+                href: getConfigurationPageUrl('user_playback_report'),
                 name: 'Playback'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('breakdown_report'),
+                href: getConfigurationPageUrl('breakdown_report'),
                 name: 'Breakdown'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('hourly_usage_report'),
+                href: getConfigurationPageUrl('hourly_usage_report'),
                 name: 'Usage'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('duration_histogram_report'),
+                href: getConfigurationPageUrl('duration_histogram_report'),
                 name: 'Duration'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('custom_query'),
+                href: getConfigurationPageUrl('custom_query'),
                 name: 'Query'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('playback_report_settings'),
+                href: getConfigurationPageUrl('playback_report_settings'),
                 name: 'Settings'
             }];
         return tabs;
     }
 
-    return function (view, params) {
+    export default function (view, params) {
 
         // init code here
         view.addEventListener('viewshow', function (e) {
@@ -151,4 +151,3 @@ define(['libraryMenu'], function (libraryMenu) {
 
         });
     };
-});
