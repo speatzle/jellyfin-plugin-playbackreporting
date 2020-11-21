@@ -27,7 +27,7 @@ const getConfigurationPageUrl = (name) => {
         return local.toJSON().slice(0, 10);
     });
 
-    ApiClient.getUserActivity = function (url_to_get) {
+    window.ApiClient.getUserActivity = function (url_to_get) {
         console.log("getUserActivity Url = " + url_to_get);
         return this.ajax({
             type: "GET",
@@ -36,7 +36,7 @@ const getConfigurationPageUrl = (name) => {
         });
     };
 
-    ApiClient.sendCustomQuery = function (url_to_get, query_data) {
+    window.ApiClient.sendCustomQuery = function (url_to_get, query_data) {
         var post_data = JSON.stringify(query_data);
         console.log("sendCustomQuery url  = " + url_to_get);
         console.log("sendCustomQuery data = " + post_data);
@@ -267,10 +267,10 @@ const getConfigurationPageUrl = (name) => {
         }
 
         var url_to_get = "user_usage_stats/" + user_id + "/" + data_label + "/GetItems?filter=" + filter.join(",") + "&stamp=" + new Date().getTime();
-        url_to_get = ApiClient.getUrl(url_to_get);
+        url_to_get = window.ApiClient.getUrl(url_to_get);
         console.log("User Report Details Url: " + url_to_get);
 
-        ApiClient.getUserActivity(url_to_get).then(function (usage_data) {
+        window.ApiClient.getUserActivity(url_to_get).then(function (usage_data) {
             //alert("Loaded Data: " + JSON.stringify(usage_data));
             populate_report(user_name, user_id, data_label, usage_data, view);
         });
@@ -286,14 +286,14 @@ const getConfigurationPageUrl = (name) => {
         console.log("Remove Item Query : " + sql);
 
         var url = "user_usage_stats/submit_custom_query?stamp=" + new Date().getTime();
-        url = ApiClient.getUrl(url);
+        url = window.ApiClient.getUrl(url);
 
         var query_data = {
             CustomQueryString: sql,
             ReplaceUserId: false
         };
 
-        ApiClient.sendCustomQuery(url, query_data).then(function (result) {
+        window.ApiClient.sendCustomQuery(url, query_data).then(function (result) {
             var message = result["message"];
             console.log("Remove Item Result : " + message);
             display_user_report(user_name, user_id, data_label, view);
@@ -454,11 +454,11 @@ const getConfigurationPageUrl = (name) => {
 
             LibraryMenu.setTabs('playback_reporting', 1, getTabs);
 
-            require([Dashboard.getConfigurationResourceUrl('Chart.bundle.min.js')], function (d3) {
+            import('./Chart.bundle.min.js').then(({default: d3}) => {
 
                 // get filter types form sever
-                var filter_url = ApiClient.getUrl("user_usage_stats/type_filter_list");
-                ApiClient.getUserActivity(filter_url).then(function (filter_data) {
+                var filter_url = window.ApiClient.getUrl("user_usage_stats/type_filter_list");
+                window.ApiClient.getUserActivity(filter_url).then(function (filter_data) {
                     filter_names = filter_data;
                 
                     // build filter list
@@ -488,8 +488,8 @@ const getConfigurationPageUrl = (name) => {
                     var days = parseInt(weeks.value) * 7;
 
                     var url = "user_usage_stats/PlayActivity?filter=" + filter_names.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=count&stamp=" + new Date().getTime();
-                    url = ApiClient.getUrl(url);
-                    ApiClient.getUserActivity(url).then(function (usage_data) {
+                    url = window.ApiClient.getUrl(url);
+                    window.ApiClient.getUserActivity(url).then(function (usage_data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
                         draw_graph(view, d3, usage_data);
                     });
@@ -514,8 +514,8 @@ const getConfigurationPageUrl = (name) => {
                         
 
                         var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=" + data_t + "&stamp=" + new Date().getTime();
-                        filtered_url = ApiClient.getUrl(filtered_url);
-                        ApiClient.getUserActivity(filtered_url).then(function (usage_data) {
+                        filtered_url = window.ApiClient.getUrl(filtered_url);
+                        window.ApiClient.getUserActivity(filtered_url).then(function (usage_data) {
                             draw_graph(view, d3, usage_data);
                         });
                     }

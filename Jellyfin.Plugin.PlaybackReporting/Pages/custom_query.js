@@ -18,7 +18,7 @@ const getConfigurationPageUrl = (name) => {
     return 'configurationpage?name=' + encodeURIComponent(name);
 }
 
-    ApiClient.sendCustomQuery = function (url_to_get, query_data) {
+    window.ApiClient.sendCustomQuery = function (url_to_get, query_data) {
         var post_data = JSON.stringify(query_data);
         console.log("sendCustomQuery url  = " + url_to_get);
         console.log("sendCustomQuery data = " + post_data);
@@ -87,14 +87,14 @@ const getConfigurationPageUrl = (name) => {
                 table_body.innerHTML = "";
 
                 var url = "user_usage_stats/submit_custom_query?stamp=" + new Date().getTime();
-                url = ApiClient.getUrl(url);
+                url = window.ApiClient.getUrl(url);
 
                 var query_data = {
                     CustomQueryString: custom_query.value,
                     ReplaceUserId: replace_userid
                 };
 
-                ApiClient.sendCustomQuery(url, query_data).then(function (result) {
+                window.ApiClient.sendCustomQuery(url, query_data).then(function (result) {
                     //alert("Loaded Data: " + JSON.stringify(result));
 
                     var message = result["message"];

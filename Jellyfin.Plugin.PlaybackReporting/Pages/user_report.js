@@ -24,7 +24,7 @@ const getConfigurationPageUrl = (name) => {
         return local.toJSON().slice(0, 10);
     });
 
-    ApiClient.getUserActivity = function (url_to_get) {
+    window.ApiClient.getUserActivity = function (url_to_get) {
         console.log("getUserActivity Url = " + url_to_get);
         return this.ajax({
             type: "GET",
@@ -88,8 +88,8 @@ const getConfigurationPageUrl = (name) => {
                 if (days == -7) days = 18250;
 
                 var url = "user_usage_stats/user_activity?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime();
-                url = ApiClient.getUrl(url);
-                ApiClient.getUserActivity(url).then(function (user_data) {
+                url = window.ApiClient.getUrl(url);
+                window.ApiClient.getUserActivity(url).then(function (user_data) {
                     console.log("usage_data: " + JSON.stringify(user_data));
                     var table_body = view.querySelector('#user_report_results');
                     var row_html = "";
@@ -102,7 +102,7 @@ const getConfigurationPageUrl = (name) => {
                         var user_image = "assets/img/avatar.png";
                         if (user_info.has_image) {
                             user_image = "Users/" + user_info.user_id + "/Images/Primary?width=50";
-                            user_image = ApiClient.getUrl(user_image);
+                            user_image = window.ApiClient.getUrl(user_image);
                         }                      
 
                         row_html += "<td><img src='" + user_image + "' width='50px' style='background-color: black;'></td>";
