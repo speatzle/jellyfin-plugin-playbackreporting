@@ -14,10 +14,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see<http://www.gnu.org/licenses/>.
 */
 
-define(['libraryMenu'], function (libraryMenu) {
-    'use strict';
+const getConfigurationPageUrl = (name) => {
+    return 'configurationpage?name=' + encodeURIComponent(name);
+}
 
-    ApiClient.getUserActivity = function (url_to_get) {
+    window.ApiClient.getUserActivity = function (url_to_get) {
         console.log("getUserActivity Url = " + url_to_get);
         return this.ajax({
             type: "GET",
@@ -27,10 +28,10 @@ define(['libraryMenu'], function (libraryMenu) {
     };	
 
     function setBackupPathCallBack(selectedDir, view) {
-        ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
+        window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
             config.BackupPath = selectedDir;
             console.log("New Config Settings : " + JSON.stringify(config));
-            ApiClient.updateNamedConfiguration('playback_reporting', config);
+            window.ApiClient.updateNamedConfiguration('playback_reporting', config);
 
             var backup_path_label = view.querySelector('#backup_path_label');
             backup_path_label.innerHTML = selectedDir;
@@ -51,33 +52,34 @@ define(['libraryMenu'], function (libraryMenu) {
     }
 
     function getTabs() {
+        console.log(window)
         var tabs = [
             {
-                href: Dashboard.getConfigurationPageUrl('user_report'),
+                href: getConfigurationPageUrl('user_report'),
                 name: 'Users'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('user_playback_report'),
+                href: getConfigurationPageUrl('user_playback_report'),
                 name: 'Playback'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('breakdown_report'),
+                href: getConfigurationPageUrl('breakdown_report'),
                 name: 'Breakdown'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('hourly_usage_report'),
+                href: getConfigurationPageUrl('hourly_usage_report'),
                 name: 'Usage'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('duration_histogram_report'),
+                href: getConfigurationPageUrl('duration_histogram_report'),
                 name: 'Duration'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('custom_query'),
+                href: getConfigurationPageUrl('custom_query'),
                 name: 'Query'
             },
             {
-                href: Dashboard.getConfigurationPageUrl('playback_report_settings'),
+                href: getConfigurationPageUrl('playback_report_settings'),
                 name: 'Settings'
             }];
         return tabs;
@@ -85,12 +87,12 @@ define(['libraryMenu'], function (libraryMenu) {
 
     function saveBackup(view) {
         var url = "user_usage_stats/save_backup?stamp=" + new Date().getTime();
-        url = ApiClient.getUrl(url);
-        ApiClient.getUserActivity(url).then(function (responce_message) {
+        url = window.ApiClient.getUrl(url);
+        window.ApiClient.getUserActivity(url).then(function (responce_message) {
             //alert("Loaded Data: " + JSON.stringify(usage_data));
             alert(responce_message[0]);
 
-            ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
+            window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
                 var backup_path_label = view.querySelector('#backup_path_label');
                 backup_path_label.innerHTML = config.BackupPath;
             });
@@ -101,8 +103,8 @@ define(['libraryMenu'], function (libraryMenu) {
     function loadBackupFile(selectedFile, view) {
         var encoded_path = encodeURI(selectedFile); 
         var url = "user_usage_stats/load_backup?backupfile=" + encoded_path + "&stamp=" + new Date().getTime();
-        url = ApiClient.getUrl(url);
-        ApiClient.getUserActivity(url).then(function (responce_message) {
+        url = window.ApiClient.getUrl(url);
+        window.ApiClient.getUserActivity(url).then(function (responce_message) {
             //alert("Loaded Data Message : " + JSON.stringify(responce_message));
             alert(responce_message[0]);
         });
@@ -111,8 +113,8 @@ define(['libraryMenu'], function (libraryMenu) {
     function showUserList(view) {
 
         var url = "user_usage_stats/user_list?stamp=" + new Date().getTime();
-        url = ApiClient.getUrl(url);
-        ApiClient.getUserActivity(url).then(function (user_list) {
+        url = window.ApiClient.getUrl(url);
+        window.ApiClient.getUserActivity(url).then(function (user_list) {
             //alert("Loaded Data: " + JSON.stringify(user_list));
 
             var add_user_list = view.querySelector('#user_list_for_add');
@@ -140,7 +142,7 @@ define(['libraryMenu'], function (libraryMenu) {
         });
     }
 
-    return function (view, params) {
+    export default function (view, params) {
 
         // init code here
         view.addEventListener('viewshow', function (e) {
@@ -164,19 +166,19 @@ define(['libraryMenu'], function (libraryMenu) {
 
             function files_to_keep_changed() {
                 var max_files = backup_files_to_keep.value;
-                ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
+                window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
                     config.MaxBackupFiles = max_files;
                     console.log("New Config Settings : " + JSON.stringify(config));
-                    ApiClient.updateNamedConfiguration('playback_reporting', config);
+                    window.ApiClient.updateNamedConfiguration('playback_reporting', config);
                 });
             }
 
             function setting_changed() {
                 var max_age = max_data_age_select.value;
-                ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
+                window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
                     config.MaxDataAge = max_age;
                     console.log("New Config Settings : " + JSON.stringify(config));
-                    ApiClient.updateNamedConfiguration('playback_reporting', config);
+                    window.ApiClient.updateNamedConfiguration('playback_reporting', config);
                 });
             }
 
@@ -212,14 +214,14 @@ define(['libraryMenu'], function (libraryMenu) {
             var remove_unknown_button = view.querySelector('#remove_unknown_button');
             remove_unknown_button.addEventListener("click", function () {
                 var url = "user_usage_stats/user_manage/remove_unknown/none" + "?stamp=" + new Date().getTime();
-                url = ApiClient.getUrl(url);
-                ApiClient.getUserActivity(url).then(function (result) {
+                url = window.ApiClient.getUrl(url);
+                window.ApiClient.getUserActivity(url).then(function (result) {
                     alert("Unknown user activity removed.");
                 });
 
             });            
 
-            ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
+            window.ApiClient.getNamedConfiguration('playback_reporting').then(function (config) {
                 loadPage(view, config);
             });
 
@@ -230,8 +232,8 @@ define(['libraryMenu'], function (libraryMenu) {
                 var add_user_list = view.querySelector('#user_list_for_add');
                 var selected_user_id = add_user_list.options[add_user_list.selectedIndex].value;
                 var url = "user_usage_stats/user_manage/add/" + selected_user_id + "?stamp=" + new Date().getTime();
-                url = ApiClient.getUrl(url);
-                ApiClient.getUserActivity(url).then(function (result) {
+                url = window.ApiClient.getUrl(url);
+                window.ApiClient.getUserActivity(url).then(function (result) {
                     //alert(result);
                     showUserList(view);
                 });
@@ -243,8 +245,8 @@ define(['libraryMenu'], function (libraryMenu) {
                 var add_user_list = view.querySelector('#user_list_for_add');
                 var selected_user_id = add_user_list.options[add_user_list.selectedIndex].value;
                 var url = "user_usage_stats/user_manage/remove/" + selected_user_id + "?stamp=" + new Date().getTime();
-                url = ApiClient.getUrl(url);
-                ApiClient.getUserActivity(url).then(function (result) {
+                url = window.ApiClient.getUrl(url);
+                window.ApiClient.getUserActivity(url).then(function (result) {
                     //alert(result);
                     showUserList(view);
                 });
@@ -262,5 +264,3 @@ define(['libraryMenu'], function (libraryMenu) {
 
         });
     };
-});
-
