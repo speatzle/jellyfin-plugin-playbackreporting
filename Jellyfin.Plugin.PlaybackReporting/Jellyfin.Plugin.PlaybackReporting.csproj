@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -44,10 +44,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Jellyfin.Data" Version="10.*-*"/>
+    <PackageReference Include="Jellyfin.Data" Version="10.*-*" />
     <PackageReference Include="Jellyfin.Controller" Version="10.*-*" />
-    <PackageReference Include="SQLitePCL.pretty.netstandard" Version="1.0.0" />
-    <PackageReference Include="System.Memory" Version="4.5.*" />
+    <PackageReference Include="SQLitePCL.pretty.netstandard" Version="2.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
   </ItemGroup>
 
