@@ -490,7 +490,7 @@ const getConfigurationPageUrl = (name) => {
                     weeks.addEventListener("change", process_click);
                     var days = parseInt(weeks.value) * 7;
 
-                    var url = "user_usage_stats/PlayActivity?filter=" + filter_names.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=count&stamp=" + new Date().getTime();
+                    var url = "user_usage_stats/PlayActivity?filter=" + filter_names.join(",") + "&days=" + days + "&endDate=" + end_date.value + "&dataType=count&stamp=" + new Date().getTime();
                     url = window.ApiClient.getUrl(url);
                     window.ApiClient.getUserActivity(url).then(function (usage_data) {
                         //alert("Loaded Data: " + JSON.stringify(usage_data));
@@ -516,7 +516,7 @@ const getConfigurationPageUrl = (name) => {
                         days = parseInt(weeks.value) * 7;
 
 
-                        var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&end_date=" + end_date.value + "&data_type=" + data_t + "&stamp=" + new Date().getTime();
+                        var filtered_url = "user_usage_stats/PlayActivity?filter=" + filter.join(",") + "&days=" + days + "&endDate=" + end_date.value + "&dataType=" + data_t + "&stamp=" + new Date().getTime();
                         filtered_url = window.ApiClient.getUrl(filtered_url);
                         window.ApiClient.getUserActivity(filtered_url).then(function (usage_data) {
                             draw_graph(view, d3, usage_data);
