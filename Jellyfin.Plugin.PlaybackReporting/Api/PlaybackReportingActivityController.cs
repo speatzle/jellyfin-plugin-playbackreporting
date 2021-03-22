@@ -205,7 +205,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("{userId}/{date}/GetItems")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromRoute] string? filter)
+        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromQuery] string? filter)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
