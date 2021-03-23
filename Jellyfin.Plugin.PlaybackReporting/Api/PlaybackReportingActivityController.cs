@@ -83,9 +83,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("user_activity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReport([FromQuery] int days, [FromQuery] DateTime? endDate)
+        public ActionResult GetUserReport([FromQuery] int days, [FromQuery] DateTime? endDate, int? timezoneOffset)
         {
-            List<Dictionary<string, object>> report = _repository.GetUserReport(days, endDate ?? DateTime.Now);
+            List<Dictionary<string, object>> report = _repository.GetUserReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0);
 
             foreach(var user_info in report)
             {
@@ -376,7 +376,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("HourlyReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetHourlyReport(int days, DateTime? endDate, string? filter)
+        public ActionResult GetHourlyReport(int days, DateTime? endDate, string? filter, [FromQuery] int? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
@@ -386,7 +386,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             endDate ??= DateTime.Now;
 
-            SortedDictionary<string, int> report = _repository.GetHourlyUsageReport(days, endDate.Value, filter_tokens);
+            SortedDictionary<string, int> report = _repository.GetHourlyUsageReport(days, endDate.Value, filter_tokens, timezoneOffset ?? 0);
 
             for (int day = 0; day < 7; day++)
             {
@@ -413,9 +413,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("{breakdownType}/BreakdownReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetBreakdownReport([FromRoute] string breakdownType, int days, DateTime? endDate)
+        public ActionResult GetBreakdownReport([FromRoute] string breakdownType, int days, DateTime? endDate, [FromQuery] int? timezoneOffset)
         {
-            List<Dictionary<string, object>> report = _repository.GetBreakdownReport(days, endDate ?? DateTime.Now, breakdownType);
+            List<Dictionary<string, object>> report = _repository.GetBreakdownReport(days, endDate ?? DateTime.Now, breakdownType, timezoneOffset ?? 0);
 
             if (breakdownType == "UserId")
             {
@@ -490,9 +490,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("GetTvShowsReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetTvShowsReport(int days, DateTime? endDate)
+        public ActionResult GetTvShowsReport(int days, DateTime? endDate, [FromQuery] int? timezoneOffset)
         {
-            return Ok(_repository.GetTvShowReport(days, endDate ?? DateTime.Now));
+            return Ok(_repository.GetTvShowReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0));
         }
 
         /// <summary>
@@ -504,9 +504,9 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("MoviesReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetMovieReport(int days, DateTime? endDate)
+        public ActionResult GetMovieReport(int days, DateTime? endDate, [FromQuery] int? timezoneOffset)
         {
-            return Ok(_repository.GetMoviesReport(days, endDate ?? DateTime.Now));
+            return Ok(_repository.GetMoviesReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0));
         }
 
         public class CustomQueryData

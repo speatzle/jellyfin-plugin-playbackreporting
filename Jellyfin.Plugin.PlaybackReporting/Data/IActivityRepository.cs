@@ -32,12 +32,12 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         void UpdatePlaybackAction(PlaybackInfo play_info);
         List<Dictionary<string, string>> GetUsageForUser(string date, string user_id, string[] filter, int timezoneOffset);
         Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime end_date, string[] types, string? data_type, int timezoneOffset);
-        SortedDictionary<string, int> GetHourlyUsageReport(int days, DateTime end_date, string[] types);
-        List<Dictionary<string, object>> GetBreakdownReport(int days, DateTime end_date, string type);
+        SortedDictionary<string, int> GetHourlyUsageReport(int days, DateTime end_date, string[] types, int timezoneOffset);
+        List<Dictionary<string, object>> GetBreakdownReport(int days, DateTime end_date, string type, int timezoneOffset);
         SortedDictionary<int, int> GetDurationHistogram(int days, DateTime end_date, string[] types);
-        List<Dictionary<string, object>> GetTvShowReport(int days, DateTime end_date);
-        List<Dictionary<string, object>> GetMoviesReport(int days, DateTime end_date);
-        List<Dictionary<string, object>> GetUserReport(int days, DateTime end_date);
+        List<Dictionary<string, object>> GetTvShowReport(int days, DateTime end_date, int timezoneOffset);
+        List<Dictionary<string, object>> GetMoviesReport(int days, DateTime end_date, int timezoneOffset);
+        List<Dictionary<string, object>> GetUserReport(int days, DateTime end_date, int timezoneOffset);
         string RunCustomQuery(string query_string, List<string> col_names, List<List<object>> results);
     }
 }
