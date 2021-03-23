@@ -30,8 +30,8 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         void DeleteOldData(DateTime? del_before);
         void AddPlaybackAction(PlaybackInfo play_info);
         void UpdatePlaybackAction(PlaybackInfo play_info);
-        List<Dictionary<string, string>> GetUsageForUser(string date, string user_id, string[] filter);
-        Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime end_date, string[] types, string? data_type);
+        List<Dictionary<string, string>> GetUsageForUser(string date, string user_id, string[] filter, int timezoneOffset);
+        Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime end_date, string[] types, string? data_type, int timezoneOffset);
         SortedDictionary<string, int> GetHourlyUsageReport(int days, DateTime end_date, string[] types);
         List<Dictionary<string, object>> GetBreakdownReport(int days, DateTime end_date, string type);
         SortedDictionary<int, int> GetDurationHistogram(int days, DateTime end_date, string[] types);

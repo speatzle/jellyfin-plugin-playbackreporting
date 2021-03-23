@@ -205,7 +205,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("{userId}/{date}/GetItems")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromQuery] string? filter)
+        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromQuery] string? filter, [FromQuery] int? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
@@ -213,7 +213,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
                 filter_tokens = filter.Split(',');
             }
 
-            List<Dictionary<string, string>> results = _repository.GetUsageForUser(date, userId, filter_tokens);
+            List<Dictionary<string, string>> results = _repository.GetUsageForUser(date, userId, filter_tokens, timezoneOffset ?? 0);
 
             List<Dictionary<string, object>> user_activity = new List<Dictionary<string, object>>();
 
@@ -299,7 +299,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("PlayActivity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType)
+        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType, int? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
@@ -309,7 +309,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
 
             endDate ??= DateTime.Now;
 
-            Dictionary<String, Dictionary<string, int>> results = _repository.GetUsageForDays(days, endDate.Value, filter_tokens, dataType);
+            Dictionary<String, Dictionary<string, int>> results = _repository.GetUsageForDays(days, endDate.Value, filter_tokens, dataType, timezoneOffset ?? 0);
 
             // add empty user for labels
             results.Add("labels_user", new Dictionary<string, int>());

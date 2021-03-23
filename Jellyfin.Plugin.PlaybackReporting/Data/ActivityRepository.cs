@@ -26,6 +26,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 {
     public class ActivityRepository : BaseSqliteRepository, IActivityRepository
     {
+        private static string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
         private readonly ILogger<ActivityRepository> _logger;
         protected IFileSystem FileSystem { get; private set; }
 
@@ -392,7 +393,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             }
         }
 
-        public List<Dictionary<string, string>> GetUsageForUser(string date, string userId, string[] types)
+        public List<Dictionary<string, string>> GetUsageForUser(string date, string userId, string[] types, int timezoneOffset)
         {
             List<string> filters = new List<string>();
             foreach (string filter in types)
@@ -412,14 +413,17 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             {
                 using var connection = CreateConnection(true);
                 using var statement = connection.PrepareStatement(sql_query);
-                statement.TryBind("@date_from", date + " 00:00:00");
-                statement.TryBind("@date_to", date + " 23:59:59");
+                var fromDate = DateTime.Parse(date + " 00:00:00").AddHours(-timezoneOffset);
+                var toDate = fromDate.AddHours(23).AddMinutes(59).AddSeconds(59);
+                statement.TryBind("@date_from", fromDate.ToString(DATE_TIME_FORMAT));
+                statement.TryBind("@date_to", toDate.ToString(DATE_TIME_FORMAT));
                 statement.TryBind("@user_id", userId);
                 foreach (var row in statement.ExecuteQuery())
                 {
+                    var time = row[0].ReadDateTime();
                     Dictionary<string, string> item = new Dictionary<string, string>
                     {
-                        ["Time"] = row[0].ReadDateTime().ToLocalTime().ToString("HH:mm"),
+                        ["Time"] = time.AddHours(timezoneOffset).ToString("h:mm tt"),
                         ["Id"] = row[1].ToString(),
                         ["Type"] = row[2].ToString(),
                         ["ItemName"] = row[3].ToString(),
@@ -437,7 +441,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             return items;
         }
 
-        public Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime endDate, string[] types, string? dataType)
+        public Dictionary<String, Dictionary<string, int>> GetUsageForDays(int days, DateTime endDate, string[] types, string? dataType, int timezoneOffset)
         {
             List<string> filters = new List<string>();
             foreach (string filter in types)
@@ -448,11 +452,11 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             string sql_query = "";
             if (dataType == "count")
             {
-                sql_query += "SELECT UserId, strftime('%Y-%m-%d', DateCreated) AS date, COUNT(1) AS count ";
+                sql_query += "SELECT UserId, DateCreated AS date, COUNT(1) AS count ";
             }
             else
             {
-                sql_query += "SELECT UserId, strftime('%Y-%m-%d', DateCreated) AS date, SUM(PlayDuration) AS count ";
+                sql_query += "SELECT UserId, DateCreated AS date, SUM(PlayDuration) AS count ";
             }
             sql_query += "FROM PlaybackActivity ";
             sql_query += "WHERE DateCreated >= @start_date AND DateCreated <= @end_date ";
@@ -460,6 +464,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             sql_query += "AND UserId not IN (select UserId from UserList) ";
             sql_query += "GROUP BY UserId, date ORDER BY UserId, date ASC";
 
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
             Dictionary<string, Dictionary<string, int>> usage = new Dictionary<string, Dictionary<string, int>>();
 
@@ -467,25 +472,33 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             {
                 using var connection = CreateConnection(true);
                 using var statement = connection.PrepareStatement(sql_query);
-                statement.TryBind("@start_date", start_date.ToString("yyyy-MM-dd 00:00:00"));
-                statement.TryBind("@end_date", endDate.ToString("yyyy-MM-dd 23:59:59"));
+                statement.TryBind("@start_date", start_date.ToString(DATE_TIME_FORMAT));
+                statement.TryBind("@end_date", endDate.ToString(DATE_TIME_FORMAT));
 
                 foreach (var row in statement.ExecuteQuery())
                 {
                     string user_id = row[0].ToString();
-                    Dictionary<string, int> uu;
+                    Dictionary<string, int> userWatchesByDate;
                     if (usage.ContainsKey(user_id))
                     {
-                        uu = usage[user_id];
+                        userWatchesByDate = usage[user_id];
                     }
                     else
                     {
-                        uu = new Dictionary<string, int>();
-                        usage.Add(user_id, uu);
+                        userWatchesByDate = new Dictionary<string, int>();
+                        usage.Add(user_id, userWatchesByDate);
                     }
-                    string date_string = row[1].ToString();
+                    string date_string = DateTime.Parse(row[1].ToString()).AddHours(timezoneOffset).ToString("yyyy-MM-dd");
                     int count_int = row[2].ToInt();
-                    uu.Add(date_string, count_int);
+                    if (userWatchesByDate.ContainsKey(date_string))
+                    {
+                        var count = userWatchesByDate[date_string];
+                        userWatchesByDate[date_string] = count_int + count;
+                    }
+                    else
+                    {
+                        userWatchesByDate.Add(date_string, count_int);
+                    }
                 }
             }
 
