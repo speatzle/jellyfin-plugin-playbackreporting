@@ -26,7 +26,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 {
     public class ActivityRepository : BaseSqliteRepository, IActivityRepository
     {
-        private static string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+        private static readonly string DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
         private readonly ILogger<ActivityRepository> _logger;
         protected IFileSystem FileSystem { get; private set; }
 

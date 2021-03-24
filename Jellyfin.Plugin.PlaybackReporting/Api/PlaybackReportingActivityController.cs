@@ -83,7 +83,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("user_activity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReport([FromQuery] int days, [FromQuery] DateTime? endDate, int? timezoneOffset)
+        public ActionResult GetUserReport([FromQuery] int days, [FromQuery] DateTime? endDate, [FromQuery] int? timezoneOffset)
         {
             List<Dictionary<string, object>> report = _repository.GetUserReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0);
 
@@ -299,7 +299,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("PlayActivity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType, int? timezoneOffset)
+        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType, [FromQuery] int? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
