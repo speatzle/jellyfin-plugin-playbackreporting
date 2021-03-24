@@ -273,7 +273,7 @@ const getConfigurationPageUrl = (name) => {
                     //Set days filter to 50 years if 'all' option is selected.
                     if (days == -7) days = 18250;
 
-                    const timezoneOffset = new Date().getTimezoneOffset() / 60;
+                    const timezoneOffset = -(new Date().getTimezoneOffset() / 60);
 
                     // build user chart
                     var url = "user_usage_stats/UserId/BreakdownReport?days=" + days + "&end_date=" + end_date.value + "&stamp=" + new Date().getTime() + "&timezoneOffset=" + timezoneOffset;

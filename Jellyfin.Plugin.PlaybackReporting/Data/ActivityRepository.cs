@@ -515,7 +515,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             SortedDictionary<string, int> report_data = new SortedDictionary<string, int>();
 
-            endDate = endDate.AddHours(timezoneOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "SELECT DateCreated, PlayDuration ";
@@ -533,7 +533,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
                 foreach (var row in statement.ExecuteQuery())
                 {
-                    DateTime date = row[0].ReadDateTime().AddHours(-timezoneOffset);
+                    DateTime date = row[0].ReadDateTime().AddHours(timezoneOffset);
                     int duration = row[1].ToInt();
 
                     int seconds_left_in_hour = 3600 - (date.Minute * 60 + date.Second);
@@ -579,7 +579,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            endDate = endDate.AddHours(timezoneOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "SELECT " + type + ", COUNT(1) AS PlayCount, SUM(PlayDuration) AS Seconds ";
@@ -662,7 +662,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            endDate = endDate.AddHours(timezoneOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "";
@@ -705,7 +705,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            endDate = endDate.AddHours(timezoneOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "";
@@ -746,7 +746,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            endDate = endDate.AddHours(timezoneOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "";
