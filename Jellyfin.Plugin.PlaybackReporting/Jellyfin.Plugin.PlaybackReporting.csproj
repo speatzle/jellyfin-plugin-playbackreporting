@@ -1,53 +1,22 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <AssemblyVersion>10.0.0.0</AssemblyVersion>
     <FileVersion>10.0.0.0</FileVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Pages\breakdown_report.html" />
-    <None Remove="Pages\breakdown_report.js" />
-    <None Remove="Pages\Chart.bundle.min.js" />
-    <None Remove="Pages\custom_query.html" />
-    <None Remove="Pages\custom_query.js" />
-    <None Remove="Pages\duration_histogram_report.html" />
-    <None Remove="Pages\duration_histogram_report.js" />
-    <None Remove="Pages\hourly_usage_report.html" />
-    <None Remove="Pages\hourly_usage_report.js" />
-    <None Remove="Pages\playback_report_settings.html" />
-    <None Remove="Pages\playback_report_settings.js" />
-    <None Remove="Pages\user_playback_report.html" />
-    <None Remove="Pages\user_playback_report.js" />
-    <None Remove="Pages\user_report.html" />
-    <None Remove="Pages\user_report.js" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Pages\breakdown_report.html" />
-    <EmbeddedResource Include="Pages\breakdown_report.js" />
-    <EmbeddedResource Include="Pages\Chart.bundle.min.js" />
-    <EmbeddedResource Include="Pages\duration_histogram_report.html" />
-    <EmbeddedResource Include="Pages\duration_histogram_report.js" />
-    <EmbeddedResource Include="Pages\hourly_usage_report.html" />
-    <EmbeddedResource Include="Pages\hourly_usage_report.js" />
-    <EmbeddedResource Include="Pages\playback_report_settings.html" />
-    <EmbeddedResource Include="Pages\playback_report_settings.js" />
-    <EmbeddedResource Include="Pages\user_playback_report.html" />
-    <EmbeddedResource Include="Pages\user_playback_report.js" />
-    <EmbeddedResource Include="Pages\custom_query.html" />
-    <EmbeddedResource Include="Pages\custom_query.js" />
-    <EmbeddedResource Include="Pages\user_report.html" />
-    <EmbeddedResource Include="Pages\user_report.js" />
+    <None Remove="Pages\*" />
+    <EmbeddedResource Include="Pages\*" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Jellyfin.Data" Version="10.*-*" />
     <PackageReference Include="Jellyfin.Controller" Version="10.*-*" />
-    <PackageReference Include="SQLitePCL.pretty.netstandard" Version="2.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="2.2.0" />
+    <PackageReference Include="SQLitePCL.pretty.netstandard" Version="3.1.0" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
 </Project>
