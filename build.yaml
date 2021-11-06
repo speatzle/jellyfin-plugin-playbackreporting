@@ -12,13 +12,13 @@ category: "General"
 artifacts:
   - "Jellyfin.Plugin.PlaybackReporting.dll"
 changelog: |-
-  - 10.8 (#49) @crobibero
+  - chore(deps): bump SQLitePCL.pretty.netstandard from 2.1.0 to 2.2.0 (#40) @dependabot
 
   ### New features and improvements ###
   - chore: plugin images (#41) @h1dden-da3m0n
 
-  ### Dependency updates ###
-  - chore(deps): bump SQLitePCL.pretty.netstandard from 2.1.0 to 2.2.0 (#40) @dependabot
-
   ### CI & build changes ###
   - Update ci (#45) @h1dden-da3m0n
+
+  ### Code or Repo Maintenance ###
+  - 10.8 (#49) @crobibero
