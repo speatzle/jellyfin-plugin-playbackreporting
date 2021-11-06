@@ -223,7 +223,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                     {
                         session_user_id = session.UserId.ToString("N");
                     }
-                    
+
                     string play_method = "na";
                     if (session.PlayState != null && session.PlayState.PlayMethod != null)
                     {
@@ -249,7 +249,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
                     string item_name = GetItemName(e.Item);
                     string item_id = e.Item.Id.ToString("N");
-                    string item_type = e.MediaInfo.Type;
+                    string item_type = e.MediaInfo.Type.ToString();
 
                     _logger.LogInformation("StartPlaybackTimer : event_playing_id     = {EventPlayingId}", event_playing_id);
                     _logger.LogInformation("StartPlaybackTimer : event_user_id        = {EventUserId}", event_user_id);

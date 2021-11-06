@@ -52,7 +52,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             _db.RunInTransaction(action, mode);
         }
 
-        public IEnumerable<IReadOnlyList<IResultSetValue>> Query(string sql)
+        public IEnumerable<IReadOnlyList<ResultSetValue>> Query(string sql)
         {
             return _db.Query(sql);
         }

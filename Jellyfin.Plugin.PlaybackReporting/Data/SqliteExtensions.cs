@@ -85,7 +85,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         private static readonly string _datetimeFormatUtc = _datetimeFormats[5];
         private static readonly string _datetimeFormatLocal = _datetimeFormats[19];
 
-        public static DateTime ReadDateTime(this IResultSetValue result)
+        public static DateTime ReadDateTime(this ResultSetValue result)
         {
             var dateText = result.ToString();
 
@@ -136,7 +136,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             }
         }
 
-        public static IEnumerable<IReadOnlyList<IResultSetValue>> ExecuteQuery(
+        public static IEnumerable<IReadOnlyList<ResultSetValue>> ExecuteQuery(
             this IStatement This)
         {
             while (This.MoveNext())
