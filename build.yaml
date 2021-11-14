@@ -4,7 +4,7 @@ guid: "5c534381-91a3-43cb-907a-35aa02eb9d2c"
 imageUrl: "https://repo.jellyfin.org/releases/plugin/images/jellyfin-plugin-playbackreporting.png"
 version: "11"
 targetAbi: "10.8.0.0"
-framework: net5.0
+framework: net6.0
 owner: "jellyfin"
 overview: "Collect and show user play statistics"
 description: "Collect and show user play statistics"
@@ -12,13 +12,13 @@ category: "General"
 artifacts:
   - "Jellyfin.Plugin.PlaybackReporting.dll"
 changelog: |-
-  - 10.8 (#49) @crobibero
+  - chore(deps): bump SQLitePCL.pretty.netstandard from 2.1.0 to 2.2.0 (#40) @dependabot
 
   ### New features and improvements ###
   - chore: plugin images (#41) @h1dden-da3m0n
 
-  ### Dependency updates ###
-  - chore(deps): bump SQLitePCL.pretty.netstandard from 2.1.0 to 2.2.0 (#40) @dependabot
-
   ### CI & build changes ###
   - Update ci (#45) @h1dden-da3m0n
+
+  ### Code or Repo Maintenance ###
+  - 10.8 (#49) @crobibero
