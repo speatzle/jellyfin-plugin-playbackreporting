@@ -17,6 +17,7 @@ along with this program. If not, see<http://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.Activity;
 using MediaBrowser.Model.IO;
@@ -59,14 +60,12 @@ namespace Jellyfin.Plugin.PlaybackReporting
             return new[] { trigger };
         }
 
-        public async System.Threading.Tasks.Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
+        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
-            await System.Threading.Tasks.Task.Run(() =>
+            await Task.Run(() =>
             {
-
                 BackupManager backup = new BackupManager(_config, _loggerFactory, _fileSystem);
                 backup.SaveBackup();
-
             }, cancellationToken);
         }
     }

@@ -17,6 +17,7 @@ along with this program. If not, see<http://www.gnu.org/licenses/>.
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Jellyfin.Plugin.PlaybackReporting.Data;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.Activity;
@@ -62,10 +63,10 @@ namespace Jellyfin.Plugin.PlaybackReporting
             return new[] { trigger };
         }
 
-        public async System.Threading.Tasks.Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
+        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
         {
 
-            await System.Threading.Tasks.Task.Run(() =>
+            await Task.Run(() =>
             {
                 _logger.LogInformation("Playback Reporting Data Trim");
 
