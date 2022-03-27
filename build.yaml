@@ -11,14 +11,10 @@ description: "Collect and show user play statistics"
 category: "General"
 artifacts:
   - "Jellyfin.Plugin.PlaybackReporting.dll"
-changelog: |-
-  - chore(deps): bump SQLitePCL.pretty.netstandard from 2.1.0 to 2.2.0 (#40) @dependabot
-
-  ### New features and improvements ###
-  - chore: plugin images (#41) @h1dden-da3m0n
+changelog: |2-
+  ### Code or Repo Maintenance ###
+  - 10.8 support (#59) @crobibero
+  - Use meta ci (#57) @crobibero
 
   ### CI & build changes ###
-  - Update ci (#45) @h1dden-da3m0n
-
-  ### Code or Repo Maintenance ###
-  - 10.8 (#49) @crobibero
+  - Use meta ci (#57) @crobibero
