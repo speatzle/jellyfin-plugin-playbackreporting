@@ -105,7 +105,7 @@ const getConfigurationPageUrl = (name) => {
                             user_image = window.ApiClient.getUrl(user_image);
                         }                      
 
-                        row_html += "<td><img src='" + user_image + "' width='50px' style='background-color: black;'></td>";
+                        row_html += "<td><img src='" + user_image + "' width='50px' height='50px' style='background-color: black; object-fit: cover;'></td>";
                         row_html += "<td>" + user_info.user_name + "</td>";
                         row_html += "<td>" + user_info.last_seen + "</td>";
                         row_html += "<td>" + user_info.item_name + "</td>";
