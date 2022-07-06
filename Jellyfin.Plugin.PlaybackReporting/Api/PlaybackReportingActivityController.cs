@@ -83,7 +83,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("user_activity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReport([FromQuery] int days, [FromQuery] DateTime? endDate, [FromQuery] int? timezoneOffset)
+        public ActionResult GetUserReport([FromQuery] int days, [FromQuery] DateTime? endDate, [FromQuery] float? timezoneOffset)
         {
             List<Dictionary<string, object>> report = _repository.GetUserReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0);
 
@@ -205,7 +205,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("{userId}/{date}/GetItems")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromQuery] string? filter, [FromQuery] int? timezoneOffset)
+        public ActionResult GetUserReportData([FromRoute] string userId, [FromRoute] string date, [FromQuery] string? filter, [FromQuery] float? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
@@ -299,7 +299,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("PlayActivity")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType, [FromQuery] int? timezoneOffset)
+        public ActionResult GetUsageStats(int days, DateTime? endDate, string? filter, string? dataType, [FromQuery] float? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
@@ -376,7 +376,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("HourlyReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetHourlyReport(int days, DateTime? endDate, string? filter, [FromQuery] int? timezoneOffset)
+        public ActionResult GetHourlyReport(int days, DateTime? endDate, string? filter, [FromQuery] float? timezoneOffset)
         {
             string[] filter_tokens = Array.Empty<string>();
             if (filter != null)
@@ -413,7 +413,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("{breakdownType}/BreakdownReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetBreakdownReport([FromRoute] string breakdownType, int days, DateTime? endDate, [FromQuery] int? timezoneOffset)
+        public ActionResult GetBreakdownReport([FromRoute] string breakdownType, int days, DateTime? endDate, [FromQuery] float? timezoneOffset)
         {
             List<Dictionary<string, object>> report = _repository.GetBreakdownReport(days, endDate ?? DateTime.Now, breakdownType, timezoneOffset ?? 0);
 
@@ -490,7 +490,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("GetTvShowsReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetTvShowsReport(int days, DateTime? endDate, [FromQuery] int? timezoneOffset)
+        public ActionResult GetTvShowsReport(int days, DateTime? endDate, [FromQuery] float? timezoneOffset)
         {
             return Ok(_repository.GetTvShowReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0));
         }
@@ -504,7 +504,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Api
         /// <returns></returns>
         [HttpGet("MoviesReport")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        public ActionResult GetMovieReport(int days, DateTime? endDate, [FromQuery] int? timezoneOffset)
+        public ActionResult GetMovieReport(int days, DateTime? endDate, [FromQuery] float? timezoneOffset)
         {
             return Ok(_repository.GetMoviesReport(days, endDate ?? DateTime.Now, timezoneOffset ?? 0));
         }
