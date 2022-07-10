@@ -413,12 +413,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             {
                 using var connection = CreateConnection(true);
                 using var statement = connection.PrepareStatement(sql_query);
-                // Convert the decimal to minutes
-                // 0.5*60 = 30
-                int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-                // Turn to negative in case timezoneOffset is negative
-                minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-                var fromDate = DateTime.Parse(date + " 00:00:00").AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+                var fromDate = DateTime.Parse(date + " 00:00:00").AddHours(-timezoneOffset);
                 var toDate = fromDate.AddHours(23).AddMinutes(59).AddSeconds(59);
                 statement.TryBind("@date_from", fromDate.ToString(DATE_TIME_FORMAT));
                 statement.TryBind("@date_to", toDate.ToString(DATE_TIME_FORMAT));
@@ -469,12 +464,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             sql_query += "AND UserId not IN (select UserId from UserList) ";
             sql_query += "GROUP BY UserId, date ORDER BY UserId, date ASC";
 
-            // Convert the decimal to minutes
-            // 0.5*60 = 30
-            int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-            // Turn to negative in case timezoneOffset is negative
-            minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-            endDate = endDate.AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
             Dictionary<string, Dictionary<string, int>> usage = new Dictionary<string, Dictionary<string, int>>();
 
@@ -498,7 +488,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
                         userWatchesByDate = new Dictionary<string, int>();
                         usage.Add(user_id, userWatchesByDate);
                     }
-                    string date_string = DateTime.Parse(row[1].ToString()).AddHours((int)timezoneOffset).AddMinutes(minOffset).ToString("yyyy-MM-dd");
+                    string date_string = DateTime.Parse(row[1].ToString()).AddHours(timezoneOffset).ToString("yyyy-MM-dd");
                     int count_int = row[2].ToInt();
                     if (userWatchesByDate.ContainsKey(date_string))
                     {
@@ -524,12 +514,8 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             }
 
             SortedDictionary<string, int> report_data = new SortedDictionary<string, int>();
-            // Convert the decimal to minutes
-            // 0.5*60 = 30
-            int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-            // Turn to negative in case timezoneOffset is negative
-            minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-            endDate = endDate.AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+            
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "SELECT DateCreated, PlayDuration ";
@@ -547,7 +533,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
                 foreach (var row in statement.ExecuteQuery())
                 {
-                    DateTime date = row[0].ReadDateTime().AddHours((int)timezoneOffset).AddMinutes(minOffset);
+                    DateTime date = row[0].ReadDateTime().AddHours(timezoneOffset);
                     int duration = row[1].ToInt();
 
                     int seconds_left_in_hour = 3600 - (date.Minute * 60 + date.Second);
@@ -593,12 +579,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
 
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            // Convert the decimal to minutes
-            // 0.5*60 = 30
-            int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-            // Turn to negative in case timezoneOffset is negative
-            minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-            endDate = endDate.AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "SELECT " + type + ", COUNT(1) AS PlayCount, SUM(PlayDuration) AS Seconds ";
@@ -681,12 +662,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            // Convert the decimal to minutes
-            // 0.5*60 = 30
-            int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-            // Turn to negative in case timezoneOffset is negative
-            minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-            endDate = endDate.AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "";
@@ -729,12 +705,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            // Convert the decimal to minutes
-            // 0.5*60 = 30
-            int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-            // Turn to negative in case timezoneOffset is negative
-            minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-            endDate = endDate.AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "";
@@ -775,12 +746,7 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
         {
             List<Dictionary<string, object>> report = new List<Dictionary<string, object>>();
 
-            // Convert the decimal to minutes
-            // 0.5*60 = 30
-            int minOffset = (int)(( timezoneOffset < 0.0 ? (-timezoneOffset)%1 : timezoneOffset%1 )*60);
-            // Turn to negative in case timezoneOffset is negative
-            minOffset = ( timezoneOffset < 0.0 ? -minOffset : minOffset );
-            endDate = endDate.AddHours((int)-timezoneOffset).AddMinutes(-minOffset);
+            endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
             string sql = "";
