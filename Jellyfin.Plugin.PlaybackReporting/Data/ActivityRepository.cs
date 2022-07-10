@@ -514,7 +514,6 @@ namespace Jellyfin.Plugin.PlaybackReporting.Data
             }
 
             SortedDictionary<string, int> report_data = new SortedDictionary<string, int>();
-            
             endDate = endDate.AddHours(-timezoneOffset);
             DateTime start_date = endDate.Subtract(new TimeSpan(days, 0, 0, 0));
 
