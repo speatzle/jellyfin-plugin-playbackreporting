@@ -97,26 +97,13 @@ namespace Jellyfin.Plugin.PlaybackReporting
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 _logger.LogInformation("Playback stop tracker found, processing stop : {Key}", key);
-                PlaybackTracker tracker = playback_trackers[key];
-                List<string> event_log = tracker.ProcessStop(e);
+                List<string> event_log = playback_trackers[key].ProcessStop(e);
                 if (event_log.Count > 0)
                 {
                     _logger.LogDebug("ProcessProgress : {Events}", string.Join("", event_log));
                 }
 
-                // if playback duration was long enough save the action
-                if (tracker.TrackedPlaybackInfo != null)
-                {
-                    _logger.LogInformation("Saving playback tracking activity in DB");
-                    _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
-                }
-                else
-                {
-                    _logger.LogInformation("Playback stop but TrackedPlaybackInfo not found! not storing activity in DB");
-                }
-
-                // remove the playback tracer from the map as we no longer need it.
-                playback_trackers.Remove(key);
+                CleanupTracker(key);
             }
             else
             {
@@ -145,26 +132,11 @@ namespace Jellyfin.Plugin.PlaybackReporting
             string key = GetPlaybackKey(e);
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
-                _logger.LogInformation("Existing tracker found! : " + key);
-
-                PlaybackTracker track = playback_trackers[key];
-                if (track.TrackedPlaybackInfo != null)
-                {
-                    _logger.LogInformation("Saving existing playback tracking activity in DB");
-                    List<string> event_log = new List<string>();
-                    track.CalculateDuration(event_log);
-                    if (event_log.Count > 0)
-                    {
-                        _logger.LogDebug("CalculateDuration : {Events}", string.Join("", event_log));
-                    }
-                    _repository?.UpdatePlaybackAction(track.TrackedPlaybackInfo);
-                }
-
-                _logger.LogInformation("Removing existing tracker : " + key);
-                playback_trackers.Remove(key);
+                _logger.LogInformation("Existing tracker found! : {key}", key);
+                CleanupTracker(key);
             }
 
-            _logger.LogInformation("Adding playback tracker : " + key);
+            _logger.LogInformation("Adding playback tracker : {key}", key);
             PlaybackTracker tracker = new PlaybackTracker(_loggerFactory.CreateLogger<PlaybackTracker>());
             tracker.ProcessStart(e);
             playback_trackers?.Add(key, tracker);
@@ -350,6 +322,27 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 return e.PlaySessionId;
             } else {
                 return e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+            }
+        }
+
+        private void CleanupTracker(string key) {
+            if (playback_trackers != null && playback_trackers.ContainsKey(key))
+            {
+                PlaybackTracker track = playback_trackers[key];
+                if (track.TrackedPlaybackInfo != null)
+                {
+                    _logger.LogInformation("Saving playback tracking activity in DB");
+                    List<string> event_log = new List<string>();
+                    track.CalculateDuration(event_log);
+                    if (event_log.Count > 0)
+                    {
+                        _logger.LogDebug("CalculateDuration : {Events}", string.Join("", event_log));
+                    }
+                    _repository?.UpdatePlaybackAction(track.TrackedPlaybackInfo);
+                }
+
+                _logger.LogInformation("Removing tracker : {key}", key);
+                playback_trackers.Remove(key);
             }
         }
 
