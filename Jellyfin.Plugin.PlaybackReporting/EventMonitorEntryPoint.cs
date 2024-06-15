@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright(C) 2018
 
 This program is free software: you can redistribute it and/or modify
@@ -67,8 +67,6 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 {
                     PlaybackTracker tracker = playback_trackers[key];
                     DateTime now = DateTime.Now;
-                    if (now.Subtract(tracker.LastUpdated).TotalSeconds > 20) // update every 20 seconds
-                    {
                         tracker.LastUpdated = now;
                         _logger.LogInformation("Processing playback tracker : {Key}", key);
                         List<string> event_log = tracker.ProcessProgress(e);
@@ -79,7 +77,6 @@ namespace Jellyfin.Plugin.PlaybackReporting
                         if (tracker.TrackedPlaybackInfo != null)
                         {
                             _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
-                        }
                     }
                 }
                 catch (Exception exp)
