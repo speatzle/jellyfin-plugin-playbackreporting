@@ -366,6 +366,14 @@ namespace Jellyfin.Plugin.PlaybackReporting
             _sessionManager.PlaybackStopped -= SessionManager_PlaybackStop;
             _sessionManager.PlaybackProgress -= SessionManager_PlaybackProgress;
 
+            _logger.LogInformation("Tracker Cleanup");
+            if (playback_trackers != null) {
+                foreach (var t in playback_trackers) {
+                    _logger.LogInformation("Removing tracker : {Key}", t.Key);
+                    CleanupTracker(t.Key);
+                }
+            }
+
             return Task.CompletedTask;
         }
     }
