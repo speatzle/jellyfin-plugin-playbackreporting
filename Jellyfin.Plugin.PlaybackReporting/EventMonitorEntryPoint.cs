@@ -68,7 +68,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                     PlaybackTracker tracker = playback_trackers[key];
                     DateTime now = DateTime.Now;
                         tracker.LastUpdated = now;
-                        _logger.LogInformation("Processing playback tracker : {Key}", key);
+                    _logger.LogDebug("Processing playback tracker : {Key}", key);
                         List<string> event_log = tracker.ProcessProgress(e);
                         if (event_log.Count > 0)
                         {
