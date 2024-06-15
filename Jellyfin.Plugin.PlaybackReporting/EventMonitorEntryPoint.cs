@@ -60,7 +60,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
         private void SessionManager_PlaybackProgress(object? sender, PlaybackProgressEventArgs e)
         {
-            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+            string key = GetPlaybackKey(e);
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 try
@@ -93,7 +93,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
         private void SessionManager_PlaybackStop(object? sender, PlaybackStopEventArgs e)
         {
-            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+            string key = GetPlaybackKey(e);
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 _logger.LogInformation("Playback stop tracker found, processing stop : {Key}", key);
@@ -142,7 +142,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 return;
             }
 
-            string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+            string key = GetPlaybackKey(e);
             if (playback_trackers != null && playback_trackers.ContainsKey(key))
             {
                 _logger.LogInformation("Existing tracker found! : " + key);
@@ -260,7 +260,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
                         _logger.LogInformation("StartPlaybackTimer : All matches, playback registered");
 
                         // update tracker with playback info
-                        string key = e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+                        string key = GetPlaybackKey(e);
                         if (playback_trackers != null && playback_trackers.ContainsKey(key))
                         {
                             _logger.LogInformation("Playback tracker found, adding playback info : {Key}", key);
@@ -341,6 +341,16 @@ namespace Jellyfin.Plugin.PlaybackReporting
             }
 
             return item_name;
+        }
+
+        private static string GetPlaybackKey(PlaybackProgressEventArgs e)
+        {
+            // Use the PlaySessionId if possible 
+            if (e.PlaySessionId != null) {
+                return e.PlaySessionId;
+            } else {
+                return e.DeviceId + "-" + e.Users[0].Id.ToString("N") + "-" + e.Item?.Id.ToString("N");
+            }
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
