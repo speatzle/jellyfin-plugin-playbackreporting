@@ -67,16 +67,16 @@ namespace Jellyfin.Plugin.PlaybackReporting
                 {
                     PlaybackTracker tracker = playback_trackers[key];
                     DateTime now = DateTime.Now;
-                        tracker.LastUpdated = now;
+                    tracker.LastUpdated = now;
                     _logger.LogDebug("Processing playback tracker : {Key}", key);
-                        List<string> event_log = tracker.ProcessProgress(e);
-                        if (event_log.Count > 0)
-                        {
-                            _logger.LogDebug("ProcessProgress : {Events}", string.Join("", event_log));
-                        }
-                        if (tracker.TrackedPlaybackInfo != null)
-                        {
-                            _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
+                    List<string> event_log = tracker.ProcessProgress(e);
+                    if (event_log.Count > 0)
+                    {
+                        _logger.LogDebug("ProcessProgress : {Events}", string.Join("", event_log));
+                    }
+                    if (tracker.TrackedPlaybackInfo != null)
+                    {
+                        _repository?.UpdatePlaybackAction(tracker.TrackedPlaybackInfo);
                     }
                 }
                 catch (Exception exp)
@@ -138,6 +138,7 @@ namespace Jellyfin.Plugin.PlaybackReporting
 
             _logger.LogInformation("Adding playback tracker : {key}", key);
             PlaybackTracker tracker = new PlaybackTracker(_loggerFactory.CreateLogger<PlaybackTracker>());
+            tracker.LastUpdated = DateTime.Now;
             tracker.ProcessStart(e);
             playback_trackers?.Add(key, tracker);
 
@@ -356,6 +357,27 @@ namespace Jellyfin.Plugin.PlaybackReporting
             _sessionManager.PlaybackStart += SessionManager_PlaybackStart;
             _sessionManager.PlaybackStopped += SessionManager_PlaybackStop;
             _sessionManager.PlaybackProgress += SessionManager_PlaybackProgress;
+
+            // Cleanup Stale Trackers Periodically
+            Task.Run(async () =>
+                {
+                    while (!cancellationToken.IsCancellationRequested)
+                    {
+                        // Wait 15 Minutes
+                        await Task.Delay(9000000, cancellationToken);
+
+                        if (playback_trackers == null) {
+                            continue;
+                        }
+
+                        _logger.LogInformation("Stale tracker cleanup");
+                        foreach (var t in playback_trackers) {
+                            if (DateTime.Now.Subtract(t.Value.LastUpdated).Minutes > 60) {
+                                CleanupTracker(t.Key);
+                            }
+                        }
+                    }
+                }, cancellationToken);
 
             return Task.CompletedTask;
         }
